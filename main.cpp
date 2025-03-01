@@ -82,7 +82,12 @@ class Intersection
     //! Poni¿szy s³ownik pozwalaja na bezpieczniejsz¹ pracê ze zbiorami grup i wierzcho³ków
     //! Bez niego usuniêcie elementu w œrodku wektora groups spowodowa³oby przesuniêcie wszystkich kolejnych identyfikatorów
     std::unordered_map<int, VertexGroup*> m_groupMap;
-    Vector2 m_pos;
+    //! m_isInletVertex stwierdza czy wierzcho³ek dany numerem indeksu jest wlotem do skrzy¿owania
+    //! nie nale¿y do Vertex albo VertexGroup, bo ten sam wierzcho³ek jest czêœci¹ skrzy¿owania i segmentu ³¹cz¹cego skrzy¿owania
+    //! np. ten sam wierzcho³ek jest wlotem w skrzy¿owaniu i wylotem w segmencie (lub na odwrót)
+    std::unordered_map<int, bool> m_isInletVertex{ false };
+
+    Vector2 m_pos;                                                          //! Œrodek skrzy¿owania
     Network& m_network;
     int m_id;
     int m_nextGroupId{ 0 };
@@ -90,20 +95,12 @@ class Intersection
 public:
     Intersection(Network& network, int id, Vector2 pos);
     VertexGroup* getGroup(int id) { return m_groupMap.count(id) ? m_groupMap[id] : nullptr; }
-    void addLeg(Vector2 legTangent, float legOffsetFromCenter, int laneCount, float laneWidth);
+    void addLeg(Vector2 legTangent, float legOffsetFromCenter, int laneCount, float laneWidth, int inletCount);
 
     int getId() const { return m_id; }
     Vector2 getPos() const { return m_pos; }
 
-    void drawGroups()                                                       //! Rysowanie grupy na ekranie
-    {
-        for (auto& group : m_groups)
-        {
-            DrawCircleV(group->getPos(), 2, GREEN);                         //! Œrodek ciê¿koœci
-            DrawLineV(group->getPos(), group->getTangent(), BLUE);          //! Wektor styczny
-            DrawLineV(group->getPos(), group->getNormal(), RED);            //! Wektor normalny
-        }
-    }
+    void drawGroups();                                                      //! Rysowanie grupy na ekranie
 
 private:
     VertexGroup* addGroup(Vector2 position, Vector2 normal)
@@ -229,10 +226,34 @@ Intersection::Intersection(Network& network, int id, Vector2 pos)
     , m_pos{ pos }
 {}
 
-void Intersection::addLeg(Vector2 legTangent, float legOffsetFromCenter, int laneCount, float laneWidth)
+void Intersection::addLeg(Vector2 legTangent, float legOffsetFromCenter, int laneCount, float laneWidth, int inletCount)
 {
     VertexGroup* group = addGroup(m_pos + legTangent * legOffsetFromCenter, legTangent);
     group->fillVertexGroup(laneCount, laneWidth);
+
+    //! przypisanie wlotów
+    std::vector<int> vertexIds{ group->getVertexIds() };
+    if (inletCount > vertexIds.size())                                  //! Je¿eli przyjêto wiêcej pasów za wlotowe ni¿ istnieje w danej grupie ustawiæ wszystkie na wloty (bez tego wystêpuje b³¹d)
+        inletCount = static_cast<int>(vertexIds.size());                //! static_cast<int>, bo .size() zwraca size_t co skutkuje warning C4267 '=': conversion from 'size_t' to 'int', possible loss of data
+    for (int i = 0; i < inletCount; ++i)
+    {
+        m_isInletVertex[vertexIds[i]] = true;
+    }
+}
+
+void Intersection::drawGroups()
+{
+    for (auto& group : m_groups)
+    {
+        DrawCircleV(group->getPos(), 2, GREEN);                         //! Œrodek ciê¿koœci
+        DrawLineV(group->getPos(), group->getTangent(), BLUE);          //! Wektor styczny
+        DrawLineV(group->getPos(), group->getNormal(), RED);            //! Wektor normalny
+    }
+    for (auto& [id, isInlet] : m_isInletVertex)                         //! Zaznaczamy wierzcho³ki wlotowe (dotyczy tylko skrzy¿owania)
+    {
+        if (isInlet)
+            DrawCircleV(m_network.getVertex(id)->m_pos, 2, RAYWHITE);   //! Wierzcho³ki wlotowe s¹ okrêgami, a wylotowe ko³ami
+    }
 }
 
 int main()
@@ -241,8 +262,10 @@ int main()
     
     Intersection* intersection1 = network.addIntersection({ 200, 200 });
     // Intersection* intersection2 = network.addIntersection({ 800, 200 });
-    intersection1->addLeg({ 0, 1 }, 40.0f, 2, 20.0f);
-    intersection1->addLeg({ 0, -1 }, 40.0f, 2, 20.0f);
+    intersection1->addLeg({ 0, 1 }, 40.0f, 2, 20.0f, 0);
+    intersection1->addLeg({ 0, -1 }, 40.0f, 2, 20.0f, 1);
+    intersection1->addLeg({ 1, 0 }, 40.0f, 2, 20.0f, 2);
+    intersection1->addLeg({ -1, 0 }, 40.0f, 2, 20.0f, 3);
     network.addEdge(intersection1->getGroup(0)->getVertexIds()[0], intersection1->getGroup(1)->getVertexIds()[1]);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PJC2025");
