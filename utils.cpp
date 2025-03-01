@@ -1,4 +1,5 @@
-#include <cmath>
+#include <cmath> // sqrt
+#include <algorithm> // max
 #include "utils.h"
 
 Vector2 operator+(const Vector2& v1, const Vector2& v2)
@@ -53,4 +54,27 @@ Vector2 Vector2Normalize(const Vector2& v)
     if (length != 0.0f)
         return { v.x / length, v.y / length };
     return v;
+}
+
+bool operator==(const Vector2& v1, const Vector2& v2) 
+{
+    const float precision = 0.00001f; //! precyzja e-5
+
+    //! porównywane wartoœci bliskie zeru
+    if (std::abs(v1.x) < precision && std::abs(v2.x) < precision &&
+        std::abs(v1.y) < precision && std::abs(v2.y) < precision) {
+        return true;
+    }
+
+    //! pozosta³e przypadki
+    float xEpsilon = std::abs(std::max(std::abs(v1.x), std::abs(v2.x)) * precision);
+    float yEpsilon = std::abs(std::max(std::abs(v1.y), std::abs(v2.y)) * precision);
+
+    return (std::abs(v1.x - v2.x) < xEpsilon) &&
+        (std::abs(v1.y - v2.y) < yEpsilon);
+}
+
+bool operator!=(const Vector2& v1, const Vector2& v2)
+{
+    return !(v1 == v2);
 }
