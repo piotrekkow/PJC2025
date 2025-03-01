@@ -3,26 +3,26 @@
 #include <unordered_map>
 #include <array>
 #include <raylib.h>
-#include "utils.h" // raylib Vector2 operator overloading
+#include "utils.h" // Przeci¹¿anie operatorów oraz dodatkowe funkcje do Vector2 zdefiniowanego w raylib.h
 
 constexpr int WINDOW_WIDTH{ 1920 };
 constexpr int WINDOW_HEIGHT{ 1080 };
 
 //! Edge reprezentuje krawêdŸ grafu (w odniesieniu do symulacji drogi jest to pas ruchu)
 struct Edge {
-    int id;                             //! Identyfikator krawêdzi
-    int destId;                         //! Identyfikator wierzcho³ka docelowego
+    int id;                                                                 //! Identyfikator krawêdzi
+    int destId;                                                             //! Identyfikator wierzcho³ka docelowego
 
-    Edge(int id, int destId) : id(id), destId(destId) {}
+    Edge(int id, int destId) : id{ id }, destId{ destId } {}
 };
 
 //! Vertex reprezentuje wierzcho³ek grafu
 struct Vertex {
-    std::vector<Edge> edges;            //! Wychodz¹ce krawêdzie
-    Vector2 pos;                        //! Pozycja wierzcho³ka relatywnie do prawego górnego rogu ekranu
-    int id;                             //! Identyfikator wierzcho³ka
+    std::vector<Edge> edges;                                                //! Wychodz¹ce krawêdzie
+    Vector2 pos;                                                            //! Pozycja wierzcho³ka relatywnie do prawego górnego rogu ekranu
+    int id;                                                                 //! Identyfikator wierzcho³ka
 
-    Vertex(int id, Vector2 pos) : id(id), pos(pos) {}
+    Vertex(int id, Vector2 pos) : id{ id }, pos{ pos } {}
 };
 
 class Network;
@@ -31,17 +31,20 @@ class Network;
 //! Definiuje metody budowania grup i rozmieszczenia wierzcho³ków
 //! Wierzcho³ki w grupie le¿¹ na jednej linii
 class VertexGroup {
-    std::vector<Vertex*> vertices;      //! VertexGroup przechowuje wskaŸniki z uwagi na potrzebê posiadania unikalnych wierzcho³ków w ca³ym grafie
-    Vector2 pos;                        //! Pozycja grupy - œrodek ciê¿koœci wierzcho³ków grupy
-    Vector2 normal;                     //! Wektor normalny do linii wierzcho³ków
-    int id;                             //! Identyfikator grupy
+    std::vector<Vertex*> vertices;                                          //! VertexGroup przechowuje wskaŸniki z uwagi na potrzebê posiadania unikalnych wierzcho³ków w ca³ym grafie
+    Vector2 pos;                                                            //! Pozycja grupy - œrodek ciê¿koœci wierzcho³ków grupy
+    Vector2 normal;                                                         //! Wektor normalny do linii wierzcho³ków
+    Network& network;
+    int id;                                                                 //! Identyfikator grupy
 
 public:
     VertexGroup(Network& network, int id, Vector2 pos, Vector2 normal);
-    void fillVertexGroup(Network& network, float laneOffset);
+    void fillVertexGroup(int numOfVertices, float laneOffset);
 
     int getId() const { return id; }
     Vector2 getPos() const { return pos; }
+    Vector2 getTangent() { return pos + (tangent() * 30); }                 //! Do debugowania (rysowania stycznej)
+    Vector2 getNormal() { return pos + (normal * 30); }                  //! Do debugowania (rysowania normalnej)
 
     std::vector<int> getVertexIds()
     {
@@ -53,7 +56,15 @@ public:
         }
         return indices;
     }
-    // ... other helper methods ...
+    
+private:
+    Vector2 tangent() { return { -normal.y, normal.x }; }
+    Vector2 getStartingPos(int numOfVertices, float laneOffset)
+    {
+        if (numOfVertices < 2 || laneOffset == 0) return pos;               //! Je¿eli zero lub jeden wierzcho³ek lub szerokoœæ pasa zero
+        float width{ (numOfVertices - 1) * laneOffset };
+        return pos - (tangent() * (width / 2));                                     //! Pozycja pocz¹tkowa jest oddalona o po³owê szerokoœci grupy od jej œrodka ciê¿koœci wzd³u¿ stycznej
+    }
 };
 
 //! Network reprezentuje najwy¿sz¹ strukturê - ca³y graf
@@ -91,13 +102,17 @@ public:
         for (auto& vertex : vertices) {
             for (auto& edge : vertex->edges) {
                 if (Vertex* dest = getVertex(edge.destId)) {
-                    DrawLineV(vertex->pos, dest->pos, BLACK);
+                    DrawLineV(vertex->pos, dest->pos, BEIGE);
                 }
             }
-            DrawCircleV(vertex->pos, 4, RED);
+            DrawCircleV(vertex->pos, 4, BROWN);
         }
         for (auto& group : groups)
+        {
             DrawCircleV(group->getPos(), 2, GREEN);
+            DrawLineV(group->getPos(), group->getTangent(), BLUE);
+            DrawLineV(group->getPos(), group->getNormal(), RED);
+        }
     }
 
 private:
@@ -113,16 +128,22 @@ private:
 };
 
 // VertexGroup implementation
-VertexGroup::VertexGroup(Network& network, int id, Vector2 pos, Vector2 normal) : id(id), pos(pos), normal(normal)
+VertexGroup::VertexGroup(Network& network, int id, Vector2 pos, Vector2 normal)
+    : id{ id }
+    , pos{ pos }
+    , normal{ normal }
+    , network{ network }
+{}
+
+void VertexGroup::fillVertexGroup(int numOfVertices, float laneOffset)
 {
-    vertices.push_back(network.addVertex(pos));
-}
+    Vector2 cursorPos{ getStartingPos(numOfVertices, laneOffset) };
 
-void VertexGroup::fillVertexGroup(Network& network, float laneOffset) {
-    Vector2 tangent = { -normal.y, normal.x };
-
-    vertices.push_back(network.addVertex(pos + (tangent * laneOffset)));        //! utils wykorzystany tutaj do operacji na wektorach
-    vertices.push_back(network.addVertex(pos - (tangent * laneOffset)));
+    for (int i = 0; i < numOfVertices; ++i)
+    {
+        vertices.push_back(network.addVertex(cursorPos));  //! utils wykorzystany tutaj do operacji na wektorach
+        cursorPos += (tangent() * laneOffset);
+    }
 }
 
 int main()
@@ -132,10 +153,14 @@ int main()
     
     VertexGroup* group = network.addGroup({ 200, 200 }, { 1, 0 });
     VertexGroup* group2 = network.addGroup({ 800, 200 }, { 1, 0 });
-    group->fillVertexGroup(network, 20.0f);
-    group2->fillVertexGroup(network, 20.0f);
+    VertexGroup* group3 = network.addGroup({ 1500, 200 }, { 1, 0 });
+    group->fillVertexGroup(3, 20.0f);
+    group2->fillVertexGroup(4, 20.0f);
+    group3->fillVertexGroup(1, 20.0f);
     network.addEdge(group->getVertexIds()[0], group2->getVertexIds()[0]);
     network.addEdge(group->getVertexIds()[1], group2->getVertexIds()[1]);
+    network.addEdge(group2->getVertexIds()[0], group3->getVertexIds()[0]);
+    network.addEdge(group2->getVertexIds()[3], group3->getVertexIds()[0]);
     //
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PJC2025");
