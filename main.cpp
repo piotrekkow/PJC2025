@@ -2,6 +2,7 @@
 #include <memory>
 #include <unordered_map>
 #include <array>
+#include <iostream>
 #include <raylib.h>
 #include "utils.h" // Przeci¹¿anie operatorów oraz dodatkowe funkcje do Vector2 zdefiniowanego w raylib.h
 
@@ -101,6 +102,7 @@ public:
     Vector2 getPos() const { return m_pos; }
 
     void drawGroups();                                                      //! Rysowanie grupy na ekranie
+    void addAllEdges();
 
 private:
     VertexGroup* addGroup(Vector2 position, Vector2 normal)
@@ -120,7 +122,7 @@ private:
 
         return ptr;
     }
-};
+ };
 
 
 //! Network reprezentuje najwy¿sz¹ strukturê - ca³y graf
@@ -199,7 +201,6 @@ private:
     }
 
     friend class VertexGroup;
-    friend class Intersection;
 };
 
 VertexGroup::VertexGroup(Network& network, int id, Vector2 pos, Vector2 normal)
@@ -228,16 +229,40 @@ Intersection::Intersection(Network& network, int id, Vector2 pos)
 
 void Intersection::addLeg(Vector2 legTangent, float legOffsetFromCenter, int laneCount, float laneWidth, int inletCount)
 {
-    VertexGroup* group = addGroup(m_pos + legTangent * legOffsetFromCenter, legTangent);
-    group->fillVertexGroup(laneCount, laneWidth);
+    VertexGroup* newGroup = addGroup(m_pos + legTangent * legOffsetFromCenter, legTangent);
+    newGroup->fillVertexGroup(laneCount, laneWidth);
 
     //! przypisanie wlotów
-    std::vector<int> vertexIds{ group->getVertexIds() };
+    std::vector<int> vertexIds{ newGroup->getVertexIds() };
     if (inletCount > vertexIds.size())                                  //! Je¿eli przyjêto wiêcej pasów za wlotowe ni¿ istnieje w danej grupie ustawiæ wszystkie na wloty (bez tego wystêpuje b³¹d)
         inletCount = static_cast<int>(vertexIds.size());                //! static_cast<int>, bo .size() zwraca size_t co skutkuje warning C4267 '=': conversion from 'size_t' to 'int', possible loss of data
     for (int i = 0; i < inletCount; ++i)
     {
         m_isInletVertex[vertexIds[i]] = true;
+    }
+}
+
+void Intersection::addAllEdges()
+{
+    std::vector<int> inletIds{};
+    for (auto& group : m_groups)   
+    {
+        for (auto& id : group->getVertexIds())
+        {
+            if (m_isInletVertex[id])
+            {
+                inletIds.push_back(id);
+            }
+        }
+    }
+    for (auto& group : m_groups)
+    {
+        for (auto& inletId : inletIds)
+        {
+            for (auto& destId : group->getVertexIds())
+                if (!m_isInletVertex[destId])
+                    m_network.addEdge(inletId, destId);
+        }
     }
 }
 
@@ -261,12 +286,16 @@ int main()
     Network network;
     
     Intersection* intersection1 = network.addIntersection({ 200, 200 });
-    // Intersection* intersection2 = network.addIntersection({ 800, 200 });
-    intersection1->addLeg({ 0, 1 }, 40.0f, 2, 20.0f, 0);
+    Intersection* intersection2 = network.addIntersection({ 800, 200 });
+    intersection1->addLeg({ 0, 1 }, 40.0f, 2, 20.0f, 1);
     intersection1->addLeg({ 0, -1 }, 40.0f, 2, 20.0f, 1);
-    intersection1->addLeg({ 1, 0 }, 40.0f, 2, 20.0f, 2);
-    intersection1->addLeg({ -1, 0 }, 40.0f, 2, 20.0f, 3);
-    network.addEdge(intersection1->getGroup(0)->getVertexIds()[0], intersection1->getGroup(1)->getVertexIds()[1]);
+    intersection1->addLeg({ 1, 0 }, 40.0f, 2, 20.0f, 1);
+    intersection1->addLeg({ -1, 0 }, 40.0f, 2, 20.0f, 1);
+    intersection1->addAllEdges();
+
+    intersection2->addLeg({ 1, 0 }, 20.0f, 3, 20.0f, 1);
+    intersection2->addLeg({ -1, 0 }, 20.0f, 2, 20.0f, 1);
+    intersection2->addAllEdges();
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PJC2025");
     SetTargetFPS(60);
