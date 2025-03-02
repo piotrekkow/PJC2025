@@ -1,13 +1,19 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
-#include <array>
 #include <iostream>
 #include <raylib.h>
 #include "utils.h" // Przeci¹¿anie operatorów oraz dodatkowe funkcje do Vector2 zdefiniowanego w raylib.h
 
 constexpr int WINDOW_WIDTH{ 1920 };
 constexpr int WINDOW_HEIGHT{ 1080 };
+
+constexpr Color BACKGROUND_COLOR{ RAYWHITE };
+constexpr Color EDGE_COLOR{ GREEN };
+constexpr Color VERTEX_COLOR{ BLACK };
+constexpr Color NORMAL_COLOR{ RED };
+constexpr Color TANGENT_COLOR{ BLUE };
+constexpr float VERTEX_RADIUS{ 6 };
 
 //! Edge reprezentuje krawêdŸ grafu (w odniesieniu do symulacji drogi jest to pas ruchu)
 struct Edge
@@ -206,12 +212,12 @@ public:
             for (auto& edge : vertex->getEdges())
             {
                 if (Vertex* dest = getVertex(edge.m_destId))                //! Potwierdzenie, ¿e wierzcho³ek o indeksie edge.m_destId istnieje
-                    DrawLineV(vertex->getPos(), getVertex(edge.m_destId)->getPos(), BEIGE);
+                    DrawLineV(vertex->getPos(), getVertex(edge.m_destId)->getPos(), EDGE_COLOR);
             }
-            DrawCircleV(vertex->getPos(), 4, BROWN);                        //! Rysujemy ka¿dy wierzcho³ek
+            DrawCircleV(vertex->getPos(), VERTEX_RADIUS, VERTEX_COLOR);                        //! Rysujemy ka¿dy wierzcho³ek
 
             if (vertex->isIntersectionInlet())
-                DrawCircleV(vertex->getPos(), 2, RAYWHITE);                 //! Gdy jest wlotem do skrzy¿owania rysujemy okr¹g (pozosta³e s¹ wlotami do segmentu)
+                DrawCircleV(vertex->getPos(), VERTEX_RADIUS / 2.0f, BACKGROUND_COLOR);                 //! Gdy jest wlotem do skrzy¿owania rysujemy okr¹g (pozosta³e s¹ wlotami do segmentu)
         }
         for (auto& intersection : m_intersections)
         {
@@ -297,9 +303,8 @@ void Intersection::drawGroups()
 {
     for (auto& group : m_groups)
     {
-        DrawCircleV(group->getPos(), 2, GREEN);                         //! Œrodek ciê¿koœci
-        DrawLineV(group->getPos(), group->getTangent(), BLUE);          //! Wektor styczny
-        DrawLineV(group->getPos(), group->getNormal(), RED);            //! Wektor normalny
+        DrawLineV(group->getPos(), group->getTangent(), TANGENT_COLOR);          //! Wektor styczny
+        DrawLineV(group->getPos(), group->getNormal(), NORMAL_COLOR);            //! Wektor normalny
     }
 }
 
@@ -327,7 +332,7 @@ int main()
     while (!WindowShouldClose())
     {
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BACKGROUND_COLOR);
 
         network.drawNetwork();
 
