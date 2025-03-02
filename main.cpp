@@ -13,7 +13,11 @@ constexpr Color EDGE_COLOR{ GREEN };
 constexpr Color VERTEX_COLOR{ BLACK };
 constexpr Color NORMAL_COLOR{ RED };
 constexpr Color TANGENT_COLOR{ BLUE };
+constexpr Color SEGMENT_COLOR{ LIGHTGRAY };
+constexpr float SEGMENT_INDICATOR_WIDTH{ 20.0f };
 constexpr float VERTEX_RADIUS{ 6 };
+
+constexpr float LANE_WIDTH{ 20.0f };
 
 //! Edge reprezentuje krawêdŸ grafu (w odniesieniu do symulacji drogi jest to pas ruchu)
 struct Edge
@@ -24,7 +28,8 @@ struct Edge
     Edge(int id, int destId) : m_id{ id }, m_destId{ destId } {}
 };
 
-enum class InletFor {
+enum class InletFor
+{
     Intersection,
     Segment
 };
@@ -32,7 +37,6 @@ enum class InletFor {
 //! Vertex reprezentuje wierzcho³ek grafu
 class Vertex
 {
-private:
     std::vector<Edge> m_edges;                                                //! Wychodz¹ce krawêdzie
     Vector2 m_pos;                                                            //! Pozycja wierzcho³ka relatywnie do lewego górnego rogu ekranu
     int m_id;
@@ -134,8 +138,10 @@ private:
     VertexGroup* addGroup(Vector2 position, Vector2 normal)
     {
         //! Sprawdzenie czy grupa z wskazanymi parametrami ju¿ istnieje
-        for (const auto& [id, group] : m_groupMap) {
-            if (group->getPos() == position && group->getNormal() == normal) {      //! utils wykorzystany tutaj do operacji na wektorach
+        for (const auto& [id, group] : m_groupMap)
+        {
+            if (group->getPos() == position && group->getNormal() == normal) //! utils wykorzystany tutaj do operacji na wektorach
+            {      
                 return group;
             }
         }
@@ -150,6 +156,30 @@ private:
     }
  };
 
+//! Segment ³¹czy dwa skrzy¿owania, a precyzyjniej ³¹czy dwa wloty skrzy¿owañ
+
+class Segment
+{
+    Intersection* m_intersection1;
+    Intersection* m_intersection2;
+    VertexGroup* m_vertexGroup1;
+    VertexGroup* m_vertexGroup2;
+    Network& m_network;
+    int m_id;
+    // ...
+public:
+    Segment(Network& network, int id, Intersection* intersection1, Intersection* intersection2) 
+        : m_network { network }
+        , m_id { id }
+        , m_intersection1{ intersection1 }
+        , m_intersection2{ intersection2 }
+    {}
+
+    Intersection* getIntersection1() { return m_intersection1; }
+    Intersection* getIntersection2() { return m_intersection2; }
+    int getId() { return m_id; }
+};
+
 
 //! Network reprezentuje najwy¿sz¹ strukturê - ca³y graf
 class Network
@@ -159,12 +189,14 @@ class Network
     //! b) s¹ unikalne w skali grafu
     std::vector<std::unique_ptr<Vertex>> m_vertices;
     std::vector<std::unique_ptr<Intersection>> m_intersections;
+    std::vector<std::unique_ptr<Segment>> m_segments;
     //! Poni¿sze s³owniki pozwalaj¹ na bezpieczniejsz¹ pracê ze zbiorami grup i wierzcho³ków
     //! Bez nich usuniêcie elementu w œrodku wektorów intersections lub vertices spowodowa³oby przesuniêcie wszystkich kolejnych identyfikatorów
     std::unordered_map<int, Vertex*> m_vertexMap;
     std::unordered_map<int, Intersection*> m_intersectionMap;
+    std::unordered_map<int, Segment*> m_segmentMap;
 
-    int m_nextIntersectionId{ 0 }, m_nextVertexId{ 0 }, m_nextEdgeId{ 0 };
+    int m_nextIntersectionId{ 0 }, m_nextSegmentId{ 0 }, m_nextVertexId{ 0 }, m_nextEdgeId{ 0 };
 
 public:
     //! Dodajemy krawêdŸ bezpoœrednio przez m_vertexMap, bo jest szybsze od przejœcia ca³ego for loopa m_vertices
@@ -183,8 +215,10 @@ public:
     Intersection* addIntersection(Vector2 position)
     {
         //! Sprawdzenie czy grupa z wskazanymi parametrami ju¿ istnieje
-        for (const auto& [id, intersection] : m_intersectionMap) {
-            if (intersection->getPos() == position) {      //! utils wykorzystany tutaj do operacji na wektorach
+        for (const auto& [id, intersection] : m_intersectionMap)
+        {
+            if (intersection->getPos() == position) //! utils wykorzystany tutaj do operacji na wektorach
+            {      
                 return intersection;
             }
         }
@@ -198,11 +232,38 @@ public:
         return ptr;
     }
 
+    Segment* addSegment(Intersection* intersection1, Intersection* intersection2)
+    {
+        for (const auto& [id, segment] : m_segmentMap)
+        {
+            if (intersection1 == segment->getIntersection1() || intersection1 == segment->getIntersection2()) return nullptr;
+            if (intersection1 == segment->getIntersection1() || intersection1 == segment->getIntersection2()) return nullptr;
+        }
+
+        auto segment = std::make_unique<Segment>(*this, m_nextSegmentId, intersection1, intersection2);
+        Segment* ptr = segment.get();
+        m_segments.push_back(std::move(segment));
+        m_segmentMap[ptr->getId()];
+        m_nextSegmentId++;
+
+        return ptr;
+    }
+
     void printExistingEdges()       //! debug
     {
         for (auto& [id, vertex] : m_vertexMap)
             for (auto& edge : vertex->getEdges())
                 std::cout << id << " -" << edge.m_id << "-> " << m_vertexMap[edge.m_destId]->getId() << '\n';
+    }
+
+    void addRoad(Vector2 pos1, Vector2 pos2, int laneCount)
+    {
+        Intersection* intersection1{ addIntersection(pos1) };
+        Intersection* intersection2{ addIntersection(pos2) };
+        Vector2 tangent{ normalizedTangent(pos1, pos2) };                                       //! znormalizowany wektor styczny do drogi
+        intersection1->addLeg(-tangent, 20.0f, laneCount, LANE_WIDTH, laneCount / 2);           //! utils umo¿liwia -tangent
+        intersection2->addLeg(tangent, 20.0f, laneCount, LANE_WIDTH, laneCount / 2);            //! OBECNIE ZAK£ADAMY ILOŒÆ WLOTÓW = 1/2 ILOŒCI PASÓW
+        addSegment(intersection1, intersection2);
     }
 
     void drawNetwork() 
@@ -222,6 +283,14 @@ public:
         for (auto& intersection : m_intersections)
         {
             intersection->drawGroups();
+        }
+    }
+
+    void drawSegments()
+    {
+        for (auto& segment : m_segments)
+        {
+            DrawLineEx(segment->getIntersection1()->getPos(), segment->getIntersection2()->getPos(), SEGMENT_INDICATOR_WIDTH, SEGMENT_COLOR); 
         }
     }
 
@@ -269,6 +338,7 @@ Intersection::Intersection(Network& network, int id, Vector2 pos)
     , m_pos{ pos }
 {}
 
+//! dodaje odnogê skrzy¿owania
 void Intersection::addLeg(Vector2 legTangent, float legOffsetFromCenter, int laneCount, float laneWidth, int inletCount)
 {
     VertexGroup* newGroup = addGroup(m_pos + legTangent * legOffsetFromCenter, legTangent);
@@ -314,15 +384,17 @@ int main()
 
     Intersection* intersection1 = network.addIntersection({ 200, 200 });
     Intersection* intersection2 = network.addIntersection({ 800, 200 });
-    intersection1->addLeg({ 0, 1 }, 40.0f, 2, 20.0f, 1);
-    intersection1->addLeg({ 0, -1 }, 40.0f, 2, 20.0f, 1);
-    intersection1->addLeg({ 1, 0 }, 40.0f, 2, 20.0f, 1);
-    intersection1->addLeg({ -1, 0 }, 40.0f, 2, 20.0f, 1);
+    intersection1->addLeg({ 0, 1 }, 40.0f, 2, LANE_WIDTH, 1);
+    intersection1->addLeg({ 0, -1 }, 40.0f, 2, LANE_WIDTH, 1);
+    intersection1->addLeg({ 1, 0 }, 40.0f, 2, LANE_WIDTH, 1);
+    intersection1->addLeg({ -1, 0 }, 40.0f, 2, LANE_WIDTH, 1);
     intersection1->addAllEdges();
 
-    intersection2->addLeg({ 1, 0 }, 20.0f, 3, 20.0f, 1);
-    intersection2->addLeg({ -1, 0 }, 20.0f, 2, 20.0f, 1);
+    intersection2->addLeg({ 1, 0 }, 20.0f, 3, LANE_WIDTH, 1);
+    intersection2->addLeg({ -1, 0 }, 20.0f, 2, LANE_WIDTH, 1);
     intersection2->addAllEdges();
+
+    network.addRoad({ 200,500 }, { 800,500 }, 2);
 
     network.printExistingEdges(); //! debug
 
@@ -334,6 +406,7 @@ int main()
         BeginDrawing();
         ClearBackground(BACKGROUND_COLOR);
 
+        network.drawSegments();
         network.drawNetwork();
 
         EndDrawing();

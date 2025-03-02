@@ -78,3 +78,13 @@ bool operator!=(const Vector2& v1, const Vector2& v2)
 {
     return !(v1 == v2);
 }
+
+Vector2 normalizedTangent(const Vector2& v1, const Vector2 v2)
+{
+    return Vector2Normalize(v1 - v2);
+}
+
+Vector2 operator-(const Vector2& v)
+{
+    return { -v.x, -v.y };
+}
