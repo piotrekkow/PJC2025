@@ -1,416 +1,123 @@
 #include <vector>
 #include <memory>
-#include <unordered_map>
 #include <iostream>
 #include <raylib.h>
-#include "utils.h" // Przeci¹¿anie operatorów oraz dodatkowe funkcje do Vector2 zdefiniowanego w raylib.h
 
 constexpr int WINDOW_WIDTH{ 1920 };
 constexpr int WINDOW_HEIGHT{ 1080 };
 
 constexpr Color BACKGROUND_COLOR{ RAYWHITE };
-constexpr Color EDGE_COLOR{ GREEN };
+constexpr Color EDGE_COLOR{ DARKGREEN };
 constexpr Color VERTEX_COLOR{ BLACK };
-constexpr Color NORMAL_COLOR{ RED };
-constexpr Color TANGENT_COLOR{ BLUE };
-constexpr Color SEGMENT_COLOR{ LIGHTGRAY };
-constexpr float SEGMENT_INDICATOR_WIDTH{ 20.0f };
-constexpr float VERTEX_RADIUS{ 6 };
+constexpr float VERTEX_RADIUS{ 4 };
 
-constexpr float LANE_WIDTH{ 20.0f };
+class Vertex;
 
-//! Edge reprezentuje krawêdŸ grafu (w odniesieniu do symulacji drogi jest to pas ruchu)
-struct Edge
+class Edge
 {
-    int m_id;
-    int m_destId;                                                             //! Identyfikator wierzcho³ka docelowego
+	Vertex* m_destination;
+	int m_id;
+	// float speedLimit;
 
-    Edge(int id, int destId) : m_id{ id }, m_destId{ destId } {}
+public:
+	Edge(int id, Vertex* destination)
+		: m_id{ id }
+		, m_destination{ destination } 
+	{}
+	
+	int getId() const { return m_id; }
+	Vertex* getDestination() const { return m_destination; }
 };
 
-enum class InletFor
-{
-    Intersection,
-    Segment
-};
-
-//! Vertex reprezentuje wierzcho³ek grafu
 class Vertex
 {
-    std::vector<Edge> m_edges;                                                //! Wychodz¹ce krawêdzie
-    Vector2 m_pos;                                                            //! Pozycja wierzcho³ka relatywnie do lewego górnego rogu ekranu
-    int m_id;
-    InletFor m_inletFor;                                                      //! Przechowuje informacjê czy wierzcho³ek jest wlotem do szkrzy¿owania czy do segmentu
+	std::vector<Edge> m_edges;
+	Vector2 m_position;
+	int m_id;
 
 public:
-    Vertex(int id, Vector2 pos, InletFor inletFor = InletFor::Segment)
-        : m_id{ id }
-        , m_pos{ pos } 
-        , m_inletFor{ inletFor }
-    {}
+	Vertex(int id, Vector2 position)
+		: m_id{ id }
+		, m_position{position}
+	{}
 
-    int getId() const { return m_id; }
-    Vector2 getPos() const { return m_pos; }
-    std::vector<Edge>& getEdges() { return m_edges; }
+	int getId() const { return m_id; }
+	Vector2 getPos() const { return m_position; }
+	std::vector<Edge>& getEdges() { return m_edges; }	// may be used in the future for removing edges
+	const std::vector<Edge>& getEdges() const { return m_edges; }
 
-    bool isIntersectionInlet() const { return m_inletFor == InletFor::Intersection; }
-    bool isSegmentInlet() const { return m_inletFor == InletFor::Segment; }
+	bool isValidDestination(Vertex* destination)	// check if the edge already exists
+	{
+		const auto& edges{ m_edges };	// create a const reference to the vector to ensure no changes
+		for (auto& edge : edges)
+		{
+			if (edge.getDestination() == destination) { return false; }
+		}
+		return true;
+	}
+};
 
-    void setAsIntersectionInlet() { m_inletFor = InletFor::Intersection; }
-    void setAsSegmentInlet() { m_inletFor = InletFor::Segment; }
+class Graph
+{
+	std::vector<std::unique_ptr<Vertex>> m_vertices;
+	int m_nextVertexId{ 0 }, m_nextEdgeId{ 0 };
+
+public:
+	Vertex* addVertex(Vector2 pos)
+	{
+		auto vertex = std::make_unique<Vertex>(m_nextVertexId, pos);
+		Vertex* ptr = vertex.get();
+		m_vertices.push_back(std::move(vertex));	// unique_ptr vertex cannot be copied - only moved
+		m_nextVertexId++;
+		return ptr;
+	}
+
+	void addEdge(Vertex* source, Vertex* destination)
+	{
+		if (source->isValidDestination(destination))
+		{
+			source->getEdges().emplace_back(m_nextEdgeId, destination);
+			m_nextEdgeId++;
+		}
+		else
+		{
+			std::cout << "Edge from " << source->getId() << " to " << destination->getId() 
+				<< " already exists.\n";
+		}
+	}
+
+	void draw()
+	{
+		for (const auto& vertex : m_vertices)
+		{
+			// draw edges
+			for (const auto& edge : vertex->getEdges())
+				DrawLineV(vertex->getPos(), edge.getDestination()->getPos(), EDGE_COLOR);
+			// draw vertices
+			DrawCircleV(vertex->getPos(), VERTEX_RADIUS, VERTEX_COLOR);
+		}	
+	}
 };
 
 
-class Network;                                                                //! Deklaracja do przodu, wykorzystywane w VertexGroup i Intersection
-
-//! VertexGroup reprezentuje strukturê wlotu do skrzy¿owania - grupê wierzcho³ków
-//! Definiuje metody budowania grup i rozmieszczenia wierzcho³ków
-//! Wierzcho³ki w grupie le¿¹ na jednej linii
-class VertexGroup
+int main() 
 {
-    std::vector<Vertex*> m_vertices;                                          //! VertexGroup przechowuje wskaŸniki z uwagi na potrzebê posiadania unikalnych wierzcho³ków w ca³ym grafie
-    Vector2 m_pos;                                                            //! Pozycja grupy - œrodek ciê¿koœci wierzcho³ków grupy
-    Vector2 m_normal;                                                         //! Wektor normalny do linii wierzcho³ków
-    Network& m_network;
-    int m_id;
+	Graph graph;
 
-public:
-    VertexGroup(Network& network, int id, Vector2 pos, Vector2 normal);
+	graph.addEdge(graph.addVertex({ 100,100 }), graph.addVertex({ 200,200 }));
 
-    int getId() const { return m_id; }
-    Vector2 getPos() const { return m_pos; }
-    std::vector<Vertex*> getVertexPointers() { return m_vertices; }
+	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PJC2025");
+	SetTargetFPS(60);
 
-    Vector2 getTangent() { return m_pos + (tangent() * 30); }                 //! Do debugowania (rysowania stycznej)
-    Vector2 getNormal() { return m_pos + (m_normal * 30); }                   //! Do debugowania (rysowania normalnej)
+	while (!WindowShouldClose())
+	{
+		BeginDrawing();
+		ClearBackground(BACKGROUND_COLOR);
 
-    void fillVertexGroup(int numOfVertices, float laneOffset, int inletCount);
+		graph.draw();
 
-    std::vector<int> getVertexIds()
-    {
-        std::vector<int> indices;
-        indices.reserve(m_vertices.size()); // Lepsza alokacja pamiêci
-        for (const auto& vertex : m_vertices)
-        {
-            indices.push_back(vertex->getId());
-        }
-        return indices;
-    }
-    
-private:
-    Vector2 tangent() { return { -m_normal.y, m_normal.x }; }                 //! Wektor styczny do linii wierzcho³ków
-    Vector2 getStartingPos(int numOfVertices, float laneOffset)
-    {
-        if (numOfVertices < 2 || laneOffset == 0) return m_pos;               //! Je¿eli zero lub jeden wierzcho³ek lub szerokoœæ pasa zero
-        float width{ (numOfVertices - 1) * laneOffset };
-        return m_pos - (tangent() * (width / 2));                             //! Pozycja pocz¹tkowa jest oddalona o po³owê szerokoœci grupy od jej œrodka ciê¿koœci wzd³u¿ stycznej
-    }
-};
+		EndDrawing();
+	}
 
-//! Intersection reprezentuje skrzy¿owanie
-//! Skrzy¿owanie sk³ada siê z grup wierzcho³ków oraz krawêdzi
-class Intersection
-{
-    //! Wektory grup przechowuj¹ unique_ptr
-    //! poniewa¿ przy zmianie rozmiaru wektora wszystkie istniej¹ce zwyk³e wskaŸniki sta³y by siê wisz¹ce
-    std::vector<std::unique_ptr<VertexGroup>> m_groups;
-    //! Poni¿szy s³ownik pozwalaja na bezpieczniejsz¹ pracê ze zbiorami grup i wierzcho³ków
-    //! Bez niego usuniêcie elementu w œrodku wektora groups spowodowa³oby przesuniêcie wszystkich kolejnych identyfikatorów
-    std::unordered_map<int, VertexGroup*> m_groupMap;
-
-    Vector2 m_pos;                                                          //! Œrodek skrzy¿owania
-    Network& m_network;
-    int m_id;
-    int m_nextGroupId{ 0 };
-
-public:
-    Intersection(Network& network, int id, Vector2 pos);
-    VertexGroup* getGroup(int id) { return m_groupMap.count(id) ? m_groupMap[id] : nullptr; }
-    void addLeg(Vector2 legTangent, float legOffsetFromCenter, int laneCount, float laneWidth, int inletCount);
-
-    int getId() const { return m_id; }
-    Vector2 getPos() const { return m_pos; }
-
-    void drawGroups();                                                      //! Rysowanie grupy na ekranie
-    void addAllEdges();
-
-private:
-    VertexGroup* addGroup(Vector2 position, Vector2 normal)
-    {
-        //! Sprawdzenie czy grupa z wskazanymi parametrami ju¿ istnieje
-        for (const auto& [id, group] : m_groupMap)
-        {
-            if (group->getPos() == position && group->getNormal() == normal) //! utils wykorzystany tutaj do operacji na wektorach
-            {      
-                return group;
-            }
-        }
-
-        auto group = std::make_unique<VertexGroup>(m_network, m_nextGroupId, position, normal);
-        VertexGroup* ptr = group.get();
-        m_groups.push_back(std::move(group));
-        m_groupMap[m_nextGroupId] = ptr;
-        m_nextGroupId++;
-
-        return ptr;
-    }
- };
-
-//! Segment ³¹czy dwa skrzy¿owania, a precyzyjniej ³¹czy dwa wloty skrzy¿owañ
-
-class Segment
-{
-    Intersection* m_intersection1;
-    Intersection* m_intersection2;
-    VertexGroup* m_vertexGroup1;
-    VertexGroup* m_vertexGroup2;
-    Network& m_network;
-    int m_id;
-    // ...
-public:
-    Segment(Network& network, int id, Intersection* intersection1, Intersection* intersection2) 
-        : m_network { network }
-        , m_id { id }
-        , m_intersection1{ intersection1 }
-        , m_intersection2{ intersection2 }
-    {}
-
-    Intersection* getIntersection1() { return m_intersection1; }
-    Intersection* getIntersection2() { return m_intersection2; }
-    int getId() { return m_id; }
-};
-
-
-//! Network reprezentuje najwy¿sz¹ strukturê - ca³y graf
-class Network
-{
-    //! Wektory skrzy¿owañ i wierzcho³ków przechowuj¹ unique_ptr
-    //! a) poniewa¿ przy zmianie rozmiaru wektora wszystkie istniej¹ce zwyk³e wskaŸniki sta³y by siê wisz¹ce
-    //! b) s¹ unikalne w skali grafu
-    std::vector<std::unique_ptr<Vertex>> m_vertices;
-    std::vector<std::unique_ptr<Intersection>> m_intersections;
-    std::vector<std::unique_ptr<Segment>> m_segments;
-    //! Poni¿sze s³owniki pozwalaj¹ na bezpieczniejsz¹ pracê ze zbiorami grup i wierzcho³ków
-    //! Bez nich usuniêcie elementu w œrodku wektorów intersections lub vertices spowodowa³oby przesuniêcie wszystkich kolejnych identyfikatorów
-    std::unordered_map<int, Vertex*> m_vertexMap;
-    std::unordered_map<int, Intersection*> m_intersectionMap;
-    std::unordered_map<int, Segment*> m_segmentMap;
-
-    int m_nextIntersectionId{ 0 }, m_nextSegmentId{ 0 }, m_nextVertexId{ 0 }, m_nextEdgeId{ 0 };
-
-public:
-    //! Dodajemy krawêdŸ bezpoœrednio przez m_vertexMap, bo jest szybsze od przejœcia ca³ego for loopa m_vertices
-    void addEdge(int srcId, int destId) 
-    {
-        if (m_vertexMap.count(srcId) && m_vertexMap.count(destId))
-        {
-            m_vertexMap[srcId]->getEdges().emplace_back(m_nextEdgeId++, destId);
-            std::cout << "added edge from " << srcId << " to " << destId << '\n';
-        }
-    }
-
-    Vertex* getVertex(int id) { return m_vertexMap.count(id) ? m_vertexMap[id] : nullptr; }
-    Intersection* getIntersection(int id) { return m_intersectionMap.count(id) ? m_intersectionMap[id] : nullptr; }
-
-    Intersection* addIntersection(Vector2 position)
-    {
-        //! Sprawdzenie czy grupa z wskazanymi parametrami ju¿ istnieje
-        for (const auto& [id, intersection] : m_intersectionMap)
-        {
-            if (intersection->getPos() == position) //! utils wykorzystany tutaj do operacji na wektorach
-            {      
-                return intersection;
-            }
-        }
-
-        auto intersection = std::make_unique<Intersection>(*this, m_nextIntersectionId, position);
-        Intersection* ptr = intersection.get();
-        m_intersections.push_back(std::move(intersection));
-        m_intersectionMap[ptr->getId()] = ptr;
-        m_nextIntersectionId++;
-
-        return ptr;
-    }
-
-    Segment* addSegment(Intersection* intersection1, Intersection* intersection2)
-    {
-        for (const auto& [id, segment] : m_segmentMap)
-        {
-            if (intersection1 == segment->getIntersection1() || intersection1 == segment->getIntersection2()) return nullptr;
-            if (intersection1 == segment->getIntersection1() || intersection1 == segment->getIntersection2()) return nullptr;
-        }
-
-        auto segment = std::make_unique<Segment>(*this, m_nextSegmentId, intersection1, intersection2);
-        Segment* ptr = segment.get();
-        m_segments.push_back(std::move(segment));
-        m_segmentMap[ptr->getId()];
-        m_nextSegmentId++;
-
-        return ptr;
-    }
-
-    void printExistingEdges()       //! debug
-    {
-        for (auto& [id, vertex] : m_vertexMap)
-            for (auto& edge : vertex->getEdges())
-                std::cout << id << " -" << edge.m_id << "-> " << m_vertexMap[edge.m_destId]->getId() << '\n';
-    }
-
-    void addRoad(Vector2 pos1, Vector2 pos2, int laneCount)
-    {
-        Intersection* intersection1{ addIntersection(pos1) };
-        Intersection* intersection2{ addIntersection(pos2) };
-        Vector2 tangent{ normalizedTangent(pos1, pos2) };                                       //! znormalizowany wektor styczny do drogi
-        intersection1->addLeg(-tangent, 20.0f, laneCount, LANE_WIDTH, laneCount / 2);           //! utils umo¿liwia -tangent
-        intersection2->addLeg(tangent, 20.0f, laneCount, LANE_WIDTH, laneCount / 2);            //! OBECNIE ZAK£ADAMY ILOŒÆ WLOTÓW = 1/2 ILOŒCI PASÓW
-        addSegment(intersection1, intersection2);
-    }
-
-    void drawNetwork() 
-    {
-        for (auto& vertex : m_vertices)
-        {
-            for (auto& edge : vertex->getEdges())
-            {
-                if (Vertex* dest = getVertex(edge.m_destId))                //! Potwierdzenie, ¿e wierzcho³ek o indeksie edge.m_destId istnieje
-                    DrawLineV(vertex->getPos(), getVertex(edge.m_destId)->getPos(), EDGE_COLOR);
-            }
-            DrawCircleV(vertex->getPos(), VERTEX_RADIUS, VERTEX_COLOR);                        //! Rysujemy ka¿dy wierzcho³ek
-
-            if (vertex->isIntersectionInlet())
-                DrawCircleV(vertex->getPos(), VERTEX_RADIUS / 2.0f, BACKGROUND_COLOR);                 //! Gdy jest wlotem do skrzy¿owania rysujemy okr¹g (pozosta³e s¹ wlotami do segmentu)
-        }
-        for (auto& intersection : m_intersections)
-        {
-            intersection->drawGroups();
-        }
-    }
-
-    void drawSegments()
-    {
-        for (auto& segment : m_segments)
-        {
-            DrawLineEx(segment->getIntersection1()->getPos(), segment->getIntersection2()->getPos(), SEGMENT_INDICATOR_WIDTH, SEGMENT_COLOR); 
-        }
-    }
-
-private:
-    Vertex* addVertex(Vector2 pos) 
-    {
-        auto vertex = std::make_unique<Vertex>(m_nextVertexId++, pos);
-        Vertex* ptr = vertex.get();
-        m_vertices.push_back(std::move(vertex));
-        m_vertexMap[ptr->getId()] = ptr;
-        return ptr;
-    }
-
-    friend class VertexGroup;
-};
-
-VertexGroup::VertexGroup(Network& network, int id, Vector2 pos, Vector2 normal)
-    : m_id{ id }
-    , m_pos{ pos }
-    , m_normal{ normal }
-    , m_network{ network }
-{}
-
-void VertexGroup::fillVertexGroup(int numOfVertices, float laneWidth, int inletCount)
-{
-    Vector2 cursorPos{ getStartingPos(numOfVertices, laneWidth) };
-
-    for (int i = 0; i < numOfVertices; ++i)
-    {
-        Vertex* newVertex{ m_network.addVertex(cursorPos) };
-        m_vertices.push_back(newVertex);
-
-        if (i < inletCount)                                             //! Ustawiamy kolejne wierzcho³ki jako wloty skrzy¿owania
-            newVertex->setAsIntersectionInlet();
-        else
-            newVertex->setAsSegmentInlet();
-
-        cursorPos += (tangent() * laneWidth);                           //! utils wykorzystany tutaj do operacji na wektorach (+= oraz *)
-    }
-}
-
-Intersection::Intersection(Network& network, int id, Vector2 pos)
-    : m_network{ network }
-    , m_id{ id }
-    , m_pos{ pos }
-{}
-
-//! dodaje odnogê skrzy¿owania
-void Intersection::addLeg(Vector2 legTangent, float legOffsetFromCenter, int laneCount, float laneWidth, int inletCount)
-{
-    VertexGroup* newGroup = addGroup(m_pos + legTangent * legOffsetFromCenter, legTangent);
-    newGroup->fillVertexGroup(laneCount, laneWidth, inletCount);
-}
-
-void Intersection::addAllEdges()
-{
-    std::vector<int> inletIds{};
-    for (auto& group : m_groups)
-    {
-        for (auto& vertex : group->getVertexPointers())
-        {
-            if (vertex->isIntersectionInlet())
-            {
-                inletIds.push_back(vertex->getId());
-            }
-        }
-    }
-    for (auto& group : m_groups)
-    {
-        for (auto& inletId : inletIds)
-        {
-            for (auto& destVertex : group->getVertexPointers())
-                if (!destVertex->isIntersectionInlet())
-                    m_network.addEdge(inletId, destVertex->getId());
-        }
-    }
-}
-
-void Intersection::drawGroups()
-{
-    for (auto& group : m_groups)
-    {
-        DrawLineV(group->getPos(), group->getTangent(), TANGENT_COLOR);          //! Wektor styczny
-        DrawLineV(group->getPos(), group->getNormal(), NORMAL_COLOR);            //! Wektor normalny
-    }
-}
-
-int main()
-{
-    Network network;
-
-    Intersection* intersection1 = network.addIntersection({ 200, 200 });
-    Intersection* intersection2 = network.addIntersection({ 800, 200 });
-    intersection1->addLeg({ 0, 1 }, 40.0f, 2, LANE_WIDTH, 1);
-    intersection1->addLeg({ 0, -1 }, 40.0f, 2, LANE_WIDTH, 1);
-    intersection1->addLeg({ 1, 0 }, 40.0f, 2, LANE_WIDTH, 1);
-    intersection1->addLeg({ -1, 0 }, 40.0f, 2, LANE_WIDTH, 1);
-    intersection1->addAllEdges();
-
-    intersection2->addLeg({ 1, 0 }, 20.0f, 3, LANE_WIDTH, 1);
-    intersection2->addLeg({ -1, 0 }, 20.0f, 2, LANE_WIDTH, 1);
-    intersection2->addAllEdges();
-
-    network.addRoad({ 200,500 }, { 800,500 }, 2);
-
-    network.printExistingEdges(); //! debug
-
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PJC2025");
-    SetTargetFPS(60);
-
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-        ClearBackground(BACKGROUND_COLOR);
-
-        network.drawSegments();
-        network.drawNetwork();
-
-        EndDrawing();
-    }
-
-    CloseWindow();
+	CloseWindow();
 }
