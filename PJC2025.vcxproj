@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)src\network;$(ProjectDir)src\utils;$(ProjectDir)src\graph;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -130,13 +133,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="old.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="src\network\Network.cpp" />
+    <ClCompile Include="src\network\Segment.cpp" />
+    <ClCompile Include="src\network\Intersection.cpp" />
+    <ClCompile Include="src\network\Leg.cpp" />
+    <ClCompile Include="src\graph\Graph.cpp" />
+    <ClCompile Include="src\graph\Edge.cpp" />
+    <ClCompile Include="src\old.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\utils\utils.cpp" />
+    <ClCompile Include="src\graph\Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\network\Network.h" />
+    <ClInclude Include="src\network\Segment.h" />
+    <ClInclude Include="src\network\Intersection.h" />
+    <ClInclude Include="src\network\Leg.h" />
+    <ClInclude Include="src\graph\Graph.h" />
+    <ClInclude Include="src\graph\Edge.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="src\utils\config.h" />
+    <ClInclude Include="src\utils\utils.h" />
+    <ClInclude Include="src\graph\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PJC2025.rc" />
