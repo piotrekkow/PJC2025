@@ -18,4 +18,3 @@ public:
 	void addEdge(Vertex* source, Vertex* destination);
 	void draw();
 };
-

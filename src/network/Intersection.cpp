@@ -9,12 +9,21 @@ Intersection::Intersection(Graph& graph, Vector2 position)
 
 const Vector2 Intersection::getPos() const { return m_position; }
 
-Leg* Intersection::addLeg(Vector2 offset, unsigned laneCount, unsigned inletCount)
+Leg* Intersection::addLeg(Vector2 offset, int laneCount, int inletCount)
 {
 	auto leg = std::make_unique<Leg>(m_graph, this, offset, laneCount, inletCount);
 	Leg* ptr = leg.get();
 	m_legs.push_back(std::move(leg));
 	return ptr;
+}
+
+const std::vector<Leg*> Intersection::getLegs() const {
+	std::vector<Leg*> legs;
+	legs.reserve(m_legs.size());
+	for (const auto& legPtr : m_legs) {
+		legs.push_back(legPtr.get());
+	}
+	return legs;
 }
 
 void Intersection::connectLegs()

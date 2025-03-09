@@ -20,6 +20,7 @@ public:
 	const bool isSegmentInlet() const;
 	void setIntersectionInlet();
 	void setSegmentInlet();
+	void setPos(Vector2 newPosition);
 
 	bool isValidDestination(Vertex* destination);
 };

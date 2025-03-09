@@ -19,5 +19,7 @@ public:
 	void addRoad(Vector2 p, Intersection* is2);
 	void addRoad(Intersection* is1, Vector2 p);
 	void addRoad(Intersection* is1, Intersection* is2);
+	void printVertices();
+	void draw(bool debug);
 };
 

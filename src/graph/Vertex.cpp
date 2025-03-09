@@ -12,7 +12,7 @@ const bool Vertex::isIntersectionInlet() const { return m_isIntersectionInlet; }
 const bool Vertex::isSegmentInlet() const { return !m_isIntersectionInlet; }
 void Vertex::setIntersectionInlet() { m_isIntersectionInlet = true; }
 void Vertex::setSegmentInlet() { m_isIntersectionInlet = false; }
-
+void Vertex::setPos(Vector2 newPosition) { m_position = newPosition; }
 
 bool Vertex::isValidDestination(Vertex* destination)	// check if the edge already exists
 {

@@ -1,10 +1,18 @@
 #include "Network.h"
+#include "Angle.h"
 
 int main()
 {
 	Graph graph;
+	Network network(graph);
 
-	graph.addEdge(graph.addVertex({ 100,100 }, true), graph.addVertex({ 200,200 }, true));
+	Intersection* is = network.addIntersection({ 400,400 });
+	[[maybe_unused]] Leg* leg = is->addLeg({ 0, 20 }, 4, 2);
+
+	network.addRoad({ 600, 200 }, { 300, 800 });
+	network.addRoad(is, { 200,200 });
+	
+	leg->getAngle().print();
 
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PJC2025");
 	SetTargetFPS(60);
@@ -13,9 +21,9 @@ int main()
 	{
 		BeginDrawing();
 		ClearBackground(BACKGROUND_COLOR);
-
-		graph.draw();
-
+		
+		network.draw(true);
+		
 		EndDrawing();
 	}
 
