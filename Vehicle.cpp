@@ -189,3 +189,65 @@ void Vehicle::followPath(float deltaTime)
     }
 }
 
+void Vehicle::draw() const
+{
+    // Draw vehicle body
+    Vector2 position = getPosition();
+    DrawRectanglePro(
+        Rectangle{position.x, position.y, m_size.x, m_size.y},
+        Vector2{m_size.x / 2, m_size.y / 2},
+        0.0f, // Rotation would be calculated based on edge direction
+        BLUE
+    );
+    
+    // Debug visualization of yielding behavior
+    if (m_state == VehicleState::YIELDING || m_state == VehicleState::STOPPED) {
+        // Indicate yielding with a red circle
+        DrawCircleV(Vector2{position.x, position.y - 10.0f}, 3.0f, RED);
+    }
+    
+    // Visualize look-ahead area if in debug mode
+    #ifdef DEBUG_MODE
+    // Draw current edge
+    DrawLineV(m_currentEdge->source()->pos(), m_currentEdge->dest()->pos(), YELLOW);
+    
+    // Draw upcoming vertices being checked
+    auto upcomingVertices = getUpcomingVertices();
+    for (const auto& [vertex, distance] : upcomingVertices) {
+        if (distance <= m_lookAheadDistance) {
+            // Draw vertex and its connecting edges
+            DrawCircleV(vertex->pos(), 5.0f, ORANGE);
+            
+            // Draw edges being checked for vehicles
+            for (Edge* edge : vertex->getInEdges()) {
+                // Skip edges in our path
+                bool edgeInPath = false;
+                for (Edge* pathEdge : m_path.edges()) {
+                    if (pathEdge == edge) {
+                        edgeInPath = true;
+                        break;
+                    }
+                }
+                
+                if (!edgeInPath) {
+                    // This is a crossing edge we're checking
+                    DrawLineV(edge->source()->pos(), edge->dest()->pos(), PINK);
+                }
+            }
+        }
+    }
+    #endif
+}
+
+Vector2 Vehicle::getPosition() const
+{
+    // Interpolate position along edge
+    float t = m_distanceAlongEdge / m_currentEdge->getLength();
+    Vector2 source = m_currentEdge->source()->pos();
+    Vector2 dest = m_currentEdge->dest()->pos();
+    
+    return {
+        source.x + t * (dest.x - source.x),
+        source.y + t * (dest.y - source.y)
+    };
+}
