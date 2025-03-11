@@ -8,7 +8,8 @@ void Node::fillNode()
 	Vector2 cursor{ m_position - step * static_cast<float>(m_laneCount - 1) / 2 };
 	for (int i = 0; i < m_laneCount; ++i)
 	{
-		m_network.addVertex(cursor);
+		Vertex* v = m_network.addVertex(cursor);
+		m_vertices.push_back(v);
 		cursor += step;
 	}
 }

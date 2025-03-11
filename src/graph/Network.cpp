@@ -38,23 +38,59 @@ Segment* Network::addSegment()
 
 void Network::draw(bool debug)
 {
-	for (auto& vertex : m_vertices)
-	{
-		for (auto& edge : vertex->out())
-		{
-			DrawLineV(vertex->pos(), edge->dest()->pos(), EDGE_COLOR);
-		}
-		DrawCircleV(vertex->pos(), VERTEX_RADIUS, VERTEX_COLOR);
-	}
-	if (debug)
-	{
-		for (auto& node : m_nodes)
-		{
-			node->drawAxes();
-		}
-	}
+    for (auto& vertex : m_vertices)
+    {
+        for (auto& edge : vertex->out())
+        {
+            Vector2 start = vertex->pos();
+            Vector2 end = edge->dest()->pos();
+
+            // Draw the main line
+            DrawLineV(start, end, EDGE_COLOR);
+
+            // Calculate arrow head
+            Vector2 direction = Vector2Normalize(end - start);
+
+            // Create the two arrow wings
+            float arrowSize = 10.0f;
+            float arrowAngle = 30.0f * DEG2RAD; // 30 degrees in radians
+
+            // Rotate direction vector for left and right wings
+            Vector2 leftWing = {
+                direction.x * cosf(arrowAngle) - direction.y * sinf(arrowAngle),
+                direction.x * sinf(arrowAngle) + direction.y * cosf(arrowAngle)
+            };
+
+            Vector2 rightWing = {
+                direction.x * cosf(-arrowAngle) - direction.y * sinf(-arrowAngle),
+                direction.x * sinf(-arrowAngle) + direction.y * cosf(-arrowAngle)
+            };
+
+            // Scale and negate the wing vectors
+            leftWing = -arrowSize * leftWing;
+            rightWing = -arrowSize * rightWing;
+
+            // Offset the arrow slightly from the destination
+            Vector2 arrowBase = end - direction * VERTEX_RADIUS;
+
+            // Draw the two wings of the arrow
+            DrawLineV(arrowBase, arrowBase + leftWing, EDGE_COLOR);
+            DrawLineV(arrowBase, arrowBase + rightWing, EDGE_COLOR);
+        }
+
+        DrawCircleV(vertex->pos(), VERTEX_RADIUS, VERTEX_COLOR);
+    }
+
+    if (debug)
+    {
+        for (auto& node : m_nodes)
+        {
+            node->drawAxes();
+        }
+    }
 }
 
 auto Network::nodes() const {
 	return m_nodes | std::views::transform([](const auto& node) { return node.get(); });
 }
+

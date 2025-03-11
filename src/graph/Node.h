@@ -10,7 +10,7 @@ class Network;
 
 class Node
 {
-	const std::vector<Vertex*> m_vertices;
+	std::vector<Vertex*> m_vertices;
 	Vector2 m_position;
 	Vector2 m_tangent;
 	const int m_laneCount;

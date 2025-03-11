@@ -2,7 +2,7 @@
 #include <memory>
 #include "Vertex.h"
 #include "Node.h"
-
+#include "VehicleGenerator.h"
 
 class Node;
 
@@ -12,6 +12,7 @@ class Network
 	std::vector<std::unique_ptr<Vertex>> m_vertices;
 	std::vector<std::unique_ptr<Node>> m_nodes;
 	// std::vector<std::unique_ptr<Segment>> m_segments;
+	std::vector<VehicleGenerator> m_generators;
 
 public:
 	Vertex* addVertex(Vector2 position);

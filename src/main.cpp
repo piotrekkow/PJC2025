@@ -65,22 +65,23 @@ int main()
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Bezier Curve");
 	SetTargetFPS(60);
 
-	QuadBezier curve({ {10, 10}, {120, 400}, {500, 550} });
+	// QuadBezier curve({ {10, 10}, {120, 400}, {500, 550} });
 
 	Network network;
 
-	Node* n1 = network.addNode({ 500,600 }, 3, { 1, 0 });
-	Node* n2 = network.addNode({ 700,600 }, 3, { -1, 0 });
-	//Node* n3 = network.addNode({ 600,500 }, 3, { 0, 1 });
-	//Node* n4 = network.addNode({ 600,700 }, 3, { 0, -1 });
+	Node* n1 = network.addNode({ 400,600 }, 1, { 1, 0 });
+	Node* n2 = network.addNode({ 800,600 }, 1, { -1, 0 });
+	Node* n3 = network.addNode({ 600,400 }, 1, { 0, 1 });
+	Node* n4 = network.addNode({ 600,800 }, 1, { 0, -1 });
 
-	network.addEdge(n1->vertices()[0], n2->vertices()[2]);
+	network.addEdge(n2->vertices()[0], n1->vertices()[0]);
+	network.addEdge(n4->vertices()[0], n3->vertices()[0]);
 
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
-		curve.drawBezier();
+		//curve.drawBezier();
 		network.draw(true);
 		EndDrawing();
 	}
