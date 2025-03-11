@@ -4,23 +4,19 @@
 #include <raylib.h>
 #include "Edge.h"
 
+class Edge;
+
 class Vertex
 {
-	std::vector<Edge> m_edges;
+	std::vector<Edge*> m_in;
+	std::vector<Edge*> m_out;
 	Vector2 m_position;
-	bool m_isIntersectionInlet;
 
 public:
-	Vertex(Vector2 position, bool isIntersectionInlet);
+	Vertex(Vector2 position);
+	Vector2& pos();
 
-	Vector2 getPos() const;
-	std::vector<Edge>& getEdges();
-	const std::vector<Edge>& getEdges() const;
-	const bool isIntersectionInlet() const;
-	const bool isSegmentInlet() const;
-	void setIntersectionInlet();
-	void setSegmentInlet();
-	void setPos(Vector2 newPosition);
-
-	bool isValidDestination(Vertex* destination);
+	void addIn(Edge* inEdge);
+	void addOut(Edge* outEdge);
+	const std::vector<Edge*>& out();
 };

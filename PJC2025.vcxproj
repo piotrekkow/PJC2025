@@ -133,25 +133,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\graph\Network.cpp" />
+    <ClCompile Include="src\graph\Node.cpp" />
     <ClCompile Include="src\utils\Angle.cpp" />
-    <ClCompile Include="src\network\Network.cpp" />
-    <ClCompile Include="src\network\Segment.cpp" />
-    <ClCompile Include="src\network\Intersection.cpp" />
-    <ClCompile Include="src\network\Leg.cpp" />
-    <ClCompile Include="src\graph\Graph.cpp" />
     <ClCompile Include="src\graph\Edge.cpp" />
-    <ClCompile Include="src\old.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\utils\utils.cpp" />
     <ClCompile Include="src\graph\Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\graph\Network.h" />
+    <ClInclude Include="src\graph\Node.h" />
     <ClInclude Include="src\utils\Angle.h" />
-    <ClInclude Include="src\network\Network.h" />
-    <ClInclude Include="src\network\Segment.h" />
-    <ClInclude Include="src\network\Intersection.h" />
-    <ClInclude Include="src\network\Leg.h" />
-    <ClInclude Include="src\graph\Graph.h" />
     <ClInclude Include="src\graph\Edge.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\utils\config.h" />

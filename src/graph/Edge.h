@@ -1,18 +1,16 @@
 #pragma once
+#include "Vertex.h"
 
 class Vertex;
 
-/**
-* Reprezentacja krawedzi w grafie
-* Kazda krawedz przechowuje wskaznik wierzcholka do ktorego wchodzi
-*/
 class Edge
 {
+	Vertex* m_source;
 	Vertex* m_destination;
-	// float speedLimit;
+	float m_length;
 
 public:
-	Edge(Vertex* destination);
-	const Vertex* getDestination() const;
+	Edge(Vertex* source, Vertex* destination);
+	float getLength();
+	Vertex* dest();
 };
-

@@ -48,6 +48,11 @@ float Vector2Length(const Vector2& v)
     return std::sqrt(v.x * v.x + v.y * v.y);
 }
 
+float Vector2Distance(const Vector2& v1, const Vector2& v2)
+{
+    return std::sqrt((v2.x-v1.x) * (v2.x - v1.x) + (v2.y - v1.y) * (v2.y - v1.y));
+}
+
 Vector2 Vector2Normalize(const Vector2& v)
 {
     float length = Vector2Length(v);
