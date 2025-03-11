@@ -36,6 +36,32 @@ Segment* Network::addSegment()
 }
 */
 
+void Network::registerVehicle(Vehicle* vehicle, Edge* edge)
+{
+    m_edgeVehicleMap[edge].push_back(vehicle);
+}
+
+void Network::unregisterVehicle(Vehicle* vehicle, Edge* edge)
+{
+    auto& vehicles = m_edgeVehicleMap[edge];
+    vehicles.erase(std::remove(vehicles.begin(), vehicles.end(), vehicle), vehicles.end());
+}
+
+void Network::updateVehicleEdge(Vehicle* vehicle, Edge* oldEdge, Edge* newEdge)
+{
+    unregisterVehicle(vehicle, oldEdge);
+    registerVehicle(vehicle, newEdge);
+}
+
+std::vector<Vehicle*> Network::getVehiclesOnEdge(Edge* edge) const
+{
+    auto it = m_edgeVehicleMap.find(edge);
+    if (it != m_edgeVehicleMap.end()) {
+        return it->second;
+    }
+    return {}; // Empty vector if no vehicles on this edge
+}
+
 void Network::draw(bool debug)
 {
     for (auto& vertex : m_vertices)
