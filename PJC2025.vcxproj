@@ -163,6 +163,10 @@
     <ResourceCompile Include="PJC2025.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="classdiagram.md">
+      <SubType>
+      </SubType>
+    </None>
     <None Include="vcpkg.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
