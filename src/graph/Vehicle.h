@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include "Edge.h"
 #include "Path.h"
@@ -46,3 +47,4 @@ private:
     bool checkForYielding();
     std::vector<std::pair<Vertex*, float>> getUpcomingVertices() const;
 };
+*/

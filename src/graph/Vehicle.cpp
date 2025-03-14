@@ -1,3 +1,4 @@
+/*
 #include "Vehicle.h"
 
 Vehicle::Vehicle(Network& network, Path path, float initSpeed)
@@ -251,3 +252,4 @@ Vector2 Vehicle::getPosition() const
         source.y + t * (dest.y - source.y)
     };
 }
+*/

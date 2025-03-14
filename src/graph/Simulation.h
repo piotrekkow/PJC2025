@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include "Network.h"
 #include "Vehicle.h"
@@ -13,3 +14,4 @@ public:
 	void update(float deltaTime);
 	void draw() const;
 };
+*/

@@ -34,7 +34,7 @@ Segment* Network::addSegment()
 {
 
 }
-*/
+
 
 void Network::registerVehicle(Vehicle* vehicle, Edge* edge)
 {
@@ -61,7 +61,7 @@ std::vector<Vehicle*> Network::getVehiclesOnEdge(Edge* edge) const
     }
     return {}; // Empty vector if no vehicles on this edge
 }
-
+*/
 void Network::draw(bool debug)
 {
     for (auto& vertex : m_vertices)

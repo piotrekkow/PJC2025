@@ -14,9 +14,7 @@ class Network
 	std::vector<std::unique_ptr<Vertex>> m_vertices;
 	std::vector<std::unique_ptr<Node>> m_nodes;
 	// std::vector<std::unique_ptr<Segment>> m_segments;
-	std::vector<VehicleGenerator> m_generators;
-
-	std::unordered_map<Edge*, std::vector<Vehicle*>> m_edgeVehicleMap;
+	// std::vector<VehicleGenerator> m_generators;
 
 public:
 	Vertex* addVertex(Vector2 position);
@@ -26,10 +24,10 @@ public:
 	void draw(bool debug);
 	auto nodes() const;
 	
-	void registerVehicle(Vehicle* vehicle, Edge* edge);
- void unregisterVehicle(Vehicle* vehicle, Edge* edge);
- void updateVehicleEdge(Vehicle* vehicle, Edge* oldEdge, Edge* newEdge);
- std::vector<Vehicle*> getVehiclesOnEdge(Edge* edge) const;
- void checkCollisions();
+	//void registerVehicle(Vehicle* vehicle, Edge* edge);
+ //void unregisterVehicle(Vehicle* vehicle, Edge* edge);
+ //void updateVehicleEdge(Vehicle* vehicle, Edge* oldEdge, Edge* newEdge);
+ //std::vector<Vehicle*> getVehiclesOnEdge(Edge* edge) const;
+ //void checkCollisions();
 };
 
