@@ -36,13 +36,13 @@
     <ClCompile Include="src\graph\Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vehicle.cpp">
+    <ClCompile Include="src\graph\Vehicle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Simulation.cpp">
+    <ClCompile Include="src\graph\Simulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Path.cpp">
+    <ClCompile Include="src\graph\Path.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\graph\VehicleGenerator.cpp">
@@ -74,13 +74,13 @@
     <ClInclude Include="src\graph\Network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vehicle.h">
+    <ClInclude Include="src\graph\Vehicle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Simulation.h">
+    <ClInclude Include="src\graph\Simulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Path.h">
+    <ClInclude Include="src\graph\Path.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\graph\VehicleGenerator.h">

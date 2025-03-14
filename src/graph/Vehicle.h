@@ -1,6 +1,7 @@
 #pragma once
 #include "Edge.h"
 #include "Path.h"
+#include "Network.h"
 
 class Vehicle
 {
@@ -30,7 +31,7 @@ class Vehicle
     VehicleState m_state{ VehicleState::MOVING };
 
 public:
-    Vehicle(Path path, float initSpeed, Network& network);
+    Vehicle(Network& network, Path path, float initSpeed);
     void update(float deltaTime);
     
     // Getters

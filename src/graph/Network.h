@@ -1,8 +1,10 @@
 #pragma once
 #include <memory>
+#include <unordered_map>
 #include "Vertex.h"
 #include "Node.h"
 #include "VehicleGenerator.h"
+#include "Vehicle.h"
 
 class Node;
 

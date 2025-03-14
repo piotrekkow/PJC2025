@@ -1,6 +1,6 @@
 #include "Vehicle.h"
 
-Vehicle::Vehicle(Path path, float initSpeed)
+Vehicle::Vehicle(Network& network, Path path, float initSpeed)
 	: m_path{ path }
 	, m_currentEdge{ path.edges()[0] }
 {
