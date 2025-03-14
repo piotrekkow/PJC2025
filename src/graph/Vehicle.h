@@ -13,7 +13,7 @@ class Vehicle
     float m_maxSpeed{ 11.0f };
     float m_acceleration{ 1.5f };
     float m_deceleration{ 3.0f };
-    Vector2 m_size{ 2.0f, 5.0f };
+    Vector2 m_size{ 20.0f, 8.0f };  // length, width
     Edge* m_currentEdge{ nullptr };
     float m_distanceAlongEdge{ 0.0f };
 

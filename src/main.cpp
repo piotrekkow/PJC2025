@@ -69,16 +69,17 @@ int main()
 
 	Network network;
 
-	Node* n1 = network.addNode({ 400,600 }, 1, { 1, 0 });
-	Node* n2 = network.addNode({ 800,600 }, 1, { -1, 0 });
-	Node* n3 = network.addNode({ 600,400 }, 1, { 0, 1 });
-	Node* n4 = network.addNode({ 600,800 }, 1, { 0, -1 });
+	Node* n1 = network.addNode({ 400, 600 }, 1, { 1, 0 });
+	Node* n2 = network.addNode({ 800, 600 }, 1, { -1, 0 });
+	Node* n3 = network.addNode({ 600, 400 }, 1, { 0, 1 });
+	Node* n4 = network.addNode({ 600, 800 }, 1, { 0, -1 });
+	Node* n5 = network.addNode({ 200, 200 }, 1, { 0, -1 });
 
-	network.addEdge(n4->vertices()[0], n3->vertices()[0]);
-
-	std::deque<Edge*> path = { network.addEdge(n2->vertices()[0], n1->vertices()[0]) };
+	std::deque<Edge*> path = { network.addEdge(n2->vertices()[0], n1->vertices()[0]), network.addEdge(n1->vertices()[0], n5->vertices()[0]) };
+	std::deque<Edge*> path2 = { network.addEdge(n4->vertices()[0], n3->vertices()[0]) };
 
 	Vehicle car(network, path, 0);
+	Vehicle car2(network, path2, 0);
 
 	while (!WindowShouldClose())
 	{
@@ -88,7 +89,9 @@ int main()
 		float delta = GetFrameTime();
 		network.draw(true);
 		car.update(delta);
+		car2.update(delta);
 		car.draw();
+		car2.draw();
 		EndDrawing();
 	}
 
