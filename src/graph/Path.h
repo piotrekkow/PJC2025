@@ -9,7 +9,6 @@
 //	float m_length;
 //
 //public:
-//	Path();
 //	Path(const std::vector<Edge*> edges, Vertex* source, Vertex* destination);
 //	const std::vector<Edge*> edges() const;
 //	float length() const;

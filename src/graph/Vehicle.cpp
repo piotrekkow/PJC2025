@@ -1,3 +1,55 @@
+#include "Vehicle.h"
+
+Vehicle::Vehicle(Network& network, std::deque<Edge*> path, float initialSpeed)
+    : m_network{ network }
+    , m_path{ path }
+    , m_speed{ initialSpeed }
+{
+    if (!path.empty())
+    {
+        m_currentEdge = m_path.front();
+    }
+}
+
+void Vehicle::update(float deltaTime)
+{
+    m_speed += m_acceleration * deltaTime;
+    
+    if (m_speed > m_maxSpeed)
+        m_speed = m_maxSpeed;
+
+    m_distanceAlongEdge += m_speed * deltaTime;
+    if (m_distanceAlongEdge >= m_currentEdge->length())
+    {
+        Edge* oldEdge = m_currentEdge;
+        m_path.pop_front();
+
+        if (!m_path.empty())
+        {
+            m_currentEdge = m_path.front();
+            m_distanceAlongEdge -= oldEdge->length();
+        }
+        else
+        {
+            
+        }
+    }
+}
+
+void Vehicle::draw()
+{
+    DrawRectangleV(position(), m_size, PURPLE);
+}
+
+Vector2 Vehicle::position()
+{
+    Vector2 sourcePosition = m_currentEdge->src()->pos();
+    return sourcePosition + m_currentEdge->tangent() * m_distanceAlongEdge;
+}
+
+
+
+
 /*
 #include "Vehicle.h"
 

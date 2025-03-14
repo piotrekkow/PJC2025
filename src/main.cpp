@@ -74,15 +74,21 @@ int main()
 	Node* n3 = network.addNode({ 600,400 }, 1, { 0, 1 });
 	Node* n4 = network.addNode({ 600,800 }, 1, { 0, -1 });
 
-	network.addEdge(n2->vertices()[0], n1->vertices()[0]);
 	network.addEdge(n4->vertices()[0], n3->vertices()[0]);
+
+	std::deque<Edge*> path = { network.addEdge(n2->vertices()[0], n1->vertices()[0]) };
+
+	Vehicle car(network, path, 0);
 
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
 		//curve.drawBezier();
+		float delta = GetFrameTime();
 		network.draw(true);
+		car.update(delta);
+		car.draw();
 		EndDrawing();
 	}
 

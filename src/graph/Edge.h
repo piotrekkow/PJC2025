@@ -11,6 +11,8 @@ class Edge
 
 public:
 	Edge(Vertex* source, Vertex* destination);
-	float getLength();
-	Vertex* dest();
+	const float length() const;
+	Vertex* dest() const;
+	Vertex* src() const;
+	const Vector2 tangent() const;
 };

@@ -6,15 +6,25 @@ Edge::Edge(Vertex* source, Vertex* destination)
 	: m_source{ source }
 	, m_destination{ destination }
 {
-	m_length = getLength();
+	m_length = length();
 }
 
-float Edge::getLength()
+const float Edge::length() const
 {
 	return Vector2Distance(m_source->pos(), m_destination->pos());
 }
 
-Vertex* Edge::dest()
+Vertex* Edge::dest() const
 {
 	return m_destination;
+}
+
+Vertex* Edge::src() const
+{
+	return m_source;
+}
+
+const Vector2 Edge::tangent() const
+{
+	return normalizedTangent(m_source->pos(), m_destination->pos());
 }
