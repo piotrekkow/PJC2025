@@ -21,6 +21,7 @@ public:
     Vehicle(Network& network, std::deque<Edge*> path, float initialSpeed);
     void update(float deltaTime);
     void draw();
+    Edge* edge() const;
 
 private:
     Vector2 position();

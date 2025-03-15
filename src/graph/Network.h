@@ -7,6 +7,7 @@
 #include "Vehicle.h"
 
 class Node;
+class Vehicle;
 
 class Network
 {
@@ -15,6 +16,7 @@ class Network
 	std::vector<std::unique_ptr<Node>> m_nodes;
 	// std::vector<std::unique_ptr<Segment>> m_segments;
 	// std::vector<VehicleGenerator> m_generators;
+	std::unordered_map<Edge*, std::vector<Vehicle*>> m_edgeVehicleMap;
 
 public:
 	Vertex* addVertex(Vector2 position);
@@ -24,10 +26,12 @@ public:
 	void draw(bool debug);
 	auto nodes() const;
 	
-	//void registerVehicle(Vehicle* vehicle, Edge* edge);
- //void unregisterVehicle(Vehicle* vehicle, Edge* edge);
- //void updateVehicleEdge(Vehicle* vehicle, Edge* oldEdge, Edge* newEdge);
+	void registerVehicle(Vehicle* vehicle);
+	void unregisterVehicle(Vehicle* vehicle);
  //std::vector<Vehicle*> getVehiclesOnEdge(Edge* edge) const;
  //void checkCollisions();
+
+private:
+	void drawArrow(Vector2& start, Vector2& end, float lineWidth, Color color);
 };
 

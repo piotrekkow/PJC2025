@@ -5,19 +5,22 @@ Vehicle::Vehicle(Network& network, std::deque<Edge*> path, float initialSpeed)
     , m_path{ path }
     , m_speed{ initialSpeed }
 {
-    if (!path.empty())
+    if (!m_path.empty())
     {
         m_currentEdge = m_path.front();
+        m_network.registerVehicle(this);
     }
 }
 
 void Vehicle::update(float deltaTime)
 {
+    // update speed
     m_speed += m_acceleration * deltaTime;
     
     if (m_speed > m_maxSpeed)
         m_speed = m_maxSpeed;
 
+    // update position
     m_distanceAlongEdge += m_speed * deltaTime;
     if (m_distanceAlongEdge >= m_currentEdge->length())
     {
@@ -26,12 +29,16 @@ void Vehicle::update(float deltaTime)
 
         if (!m_path.empty())
         {
+            m_network.unregisterVehicle(this);
             m_currentEdge = m_path.front();
             m_distanceAlongEdge -= oldEdge->length();
+            m_network.registerVehicle(this);
         }
         else
         {
-            
+            m_network.unregisterVehicle(this);
+            m_currentEdge = nullptr;
+            m_speed = 0.0f;
         }
     }
 }
@@ -41,30 +48,30 @@ void Vehicle::draw()
     Vector2 pos = position();
     Vector2 tangent = m_currentEdge->tangent();
 
-    // Calculate rotation angle in degrees from tangent vector
-    // atan2 gives angle in radians from x-axis
     float rotation = atan2f(tangent.y, tangent.x) * RAD2DEG;
 
-    // Draw the rotated rectangle
     Rectangle rect = {
         pos.x, pos.y,
         m_size.x, m_size.y
     };
 
-    // Define the origin point (center of rectangle)
     Vector2 origin = {
         m_size.x / 2.0f,
         m_size.y / 2.0f
     };
 
-    // Draw rotated rectangle
     DrawRectanglePro(rect, origin, rotation, PURPLE);
 
-    // Debug info
+    // Debug
     DrawText(TextFormat("Speed: %.1f", m_speed), 10, 10, 20, BLACK);
     DrawText(TextFormat("Dist: %.1f", m_distanceAlongEdge), 10, 40, 20, BLACK);
     DrawText(TextFormat("Angle: %.1f°", rotation), 10, 70, 20, BLACK);
     DrawLineEx(pos, pos + tangent * 30.0f, 2.0f, BROWN);
+}
+
+Edge* Vehicle::edge() const
+{
+    return m_currentEdge;
 }
 
 Vector2 Vehicle::position()
