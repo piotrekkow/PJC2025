@@ -21,7 +21,7 @@ class Network
 public:
 	Vertex* addVertex(Vector2 position);
 	Edge* addEdge(Vertex* source, Vertex* destination);
-	void addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent); // adds a set of edges and vertices along a quadratic bezier curve
+	Edge* addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent); // adds a set of edges and vertices along a quadratic bezier curve, returns final edge
 	Node* addNode(Vector2 position, int laneCount, Vector2 tangent);
 	// Segment* addSegment();
 	void draw(bool debug);

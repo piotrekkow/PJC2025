@@ -23,30 +23,32 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination)
 	return ptr;
 }
 
-void Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent)
+Edge* Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent)
 {
     Vector2 intersection;
     if (lineIntersect(source->pos(), inTangent, destination->pos(), outTangent, intersection))
     {
         QuadBezier curve(source->pos(), intersection, destination->pos(), curveSubdiv);
-        for (auto& point : curve.points())
+        Vertex* currentVertex{ source };
+
+        for (size_t i = 1; i < curve.points().size(); ++i)
         {
-            if (point == curve.points().front())
+            const Vector2& point{ curve.points()[i] };
+            if (i == curve.points().size() - 1)
             {
-                Vertex* newVertex{ addVertex(point) };
-                addEdge(source, newVertex);
-            }
-            else if (point == curve.points().back())
-            {
-                addEdge(m_vertices.back().get(), destination);
+                return addEdge(currentVertex, destination);
             }
             else
             {
-                Vertex* lastVertex{ m_vertices.back().get()};
                 Vertex* newVertex{ addVertex(point) };
-                addEdge(lastVertex, newVertex);
+                addEdge(currentVertex, newVertex);
+                currentVertex = newVertex;
             }
         }
+    }
+    else
+    {
+        addEdge(source, destination);
     }
 }
 
