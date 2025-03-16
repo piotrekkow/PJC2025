@@ -15,3 +15,4 @@ bool operator==(const Vector2& v1, const Vector2& v2);
 bool operator!=(const Vector2& v1, const Vector2& v2);
 Vector2 normalizedTangent(const Vector2& v1, const Vector2 v2);
 Vector2 operator-(const Vector2& v);
+bool lineIntersect(const Vector2& v1, const Vector2& tangent1, const Vector2& v2, const Vector2& tangent2, Vector2& intersection);

@@ -1,4 +1,5 @@
 #include "Network.h"
+#include "QuadBezier.h"
 
 Vertex* Network::addVertex(Vector2 position)
 {
@@ -21,6 +22,34 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination)
 	destination->addIn(ptr);
 	return ptr;
 }
+
+void Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent)
+{
+    Vector2 intersection;
+    if (lineIntersect(source->pos(), inTangent, destination->pos(), outTangent, intersection))
+    {
+        QuadBezier curve(source->pos(), intersection, destination->pos(), curveSubdiv);
+        for (auto& point : curve.points())
+        {
+            if (point == curve.points().front())
+            {
+                Vertex* newVertex{ addVertex(point) };
+                addEdge(source, newVertex);
+            }
+            else if (point == curve.points().back())
+            {
+                addEdge(m_vertices.back().get(), destination);
+            }
+            else
+            {
+                Vertex* lastVertex{ m_vertices.back().get()};
+                Vertex* newVertex{ addVertex(point) };
+                addEdge(lastVertex, newVertex);
+            }
+        }
+    }
+}
+
 
 Node* Network::addNode(Vector2 position, int laneCount, Vector2 tangent)
 {

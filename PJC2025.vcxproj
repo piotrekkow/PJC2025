@@ -133,6 +133,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\utils\QuadBezier.cpp" />
+    <ClCompile Include="src\graph\Segment.cpp" />
     <ClCompile Include="src\graph\Path.cpp" />
     <ClCompile Include="src\graph\Simulation.cpp" />
     <ClCompile Include="src\graph\Network.cpp" />
@@ -146,6 +148,8 @@
     <ClCompile Include="src\graph\VehicleGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\utils\QuadBezier.h" />
+    <ClInclude Include="src\graph\Segment.h" />
     <ClInclude Include="src\graph\Path.h" />
     <ClInclude Include="src\graph\Simulation.h" />
     <ClInclude Include="src\graph\Network.h" />

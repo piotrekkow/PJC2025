@@ -1,64 +1,8 @@
-#include <raylib.h>
-#include <vector>
-#include <memory> // unique_ptr
-#include <utility> // pair
-#include <array>
-
 #include "utils.h"
 #include "config.h"
 #include "Network.h"
-
-class QuadBezier
-{
-	static constexpr int m_subdivisions{ 16 };
-	std::array<Vector2, 3> m_controlPoints{}; // control points
-	std::array<Vector2, m_subdivisions + 1> m_points;
-
-	Vector2 getCurvePoint(float t) const
-	{
-		float u = 1.0f - t;
-		float tt = t * t;
-		float uu = u * u;
-		return {
-			uu * m_controlPoints[0].x + 2 * t * u * m_controlPoints[1].x + tt * m_controlPoints[2].x,
-			uu * m_controlPoints[0].y + 2 * t * u * m_controlPoints[1].y + tt * m_controlPoints[2].y
-		};
-	}
-
-	void setOfPoints()
-	{
-		for (int i = 0; i <= m_subdivisions; ++i)
-		{
-			float t = static_cast<float>(i) / m_subdivisions;
-			m_points[i] = getCurvePoint(t);
-		}
-	}
-
-public:
-	QuadBezier(std::array<Vector2, 3> points) : m_controlPoints{ points }
-	{
-		setOfPoints();
-	}
-
-	QuadBezier(Vector2 point1, Vector2 point2, Vector2 point3)
-		: QuadBezier(std::array<Vector2, 3>{ point1, point2, point3 }) {
-	}
-
-
-	void drawBezier() const
-	{
-		for (int i = 0; i < m_subdivisions; ++i)
-		{
-			DrawLineV(m_points[i], m_points[i + 1], BLACK);
-		}
-	}
-};
-
-class Segment
-{
-	std::pair<Node*, Node*> m_ends;
-	Vector2 tangent;
-};
+#include "QuadBezier.h"
+#include "Segment.h"
 
 int main()
 {
@@ -77,9 +21,12 @@ int main()
 
 	std::deque<Edge*> path = { network.addEdge(n2->vertices()[0], n1->vertices()[0]), network.addEdge(n1->vertices()[0], n5->vertices()[0]) };
 	// std::deque<Edge*> path2 = { network.addEdge(n4->vertices()[0], n3->vertices()[0]) };
+	network.addEdge(network.addVertex({ 600,400 }), network.addVertex({ 900,100 }), 12, { 1,0 }, { 0,1 });
 
 	Vehicle car(network, path, 0);
 	// Vehicle car2(network, path2, 0);
+
+	Segment(network, { 1000,100 }, { 300, 200 }, 2);
 
 	while (!WindowShouldClose())
 	{

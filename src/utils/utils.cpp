@@ -93,3 +93,17 @@ Vector2 operator-(const Vector2& v)
 {
     return { -v.x, -v.y };
 }
+
+bool lineIntersect(const Vector2& v1, const Vector2& tangent1, const Vector2& v2, const Vector2& tangent2, Vector2& intersection)
+{
+    float det = tangent1.x * tangent2.y - tangent1.y * tangent2.x;
+    if (std::abs(det) < 1e-5f)
+    {
+        return false; // lines parallel
+    }
+        
+    Vector2 diff{ v2 - v1 };
+    float s{ diff.x * tangent2.y - diff.y * tangent2.x };
+    intersection = v1 + tangent1 * s;
+    return true;
+}
