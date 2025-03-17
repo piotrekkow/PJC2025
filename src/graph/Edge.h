@@ -15,4 +15,6 @@ public:
 	Vertex* dest() const;
 	Vertex* src() const;
 	const Vector2 tangent() const;
+	void updateSource(Vertex* newSource);
+	void updateDestination(Vertex* newDestination);
 };

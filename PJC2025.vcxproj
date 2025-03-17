@@ -147,6 +147,7 @@
     <ClCompile Include="src\graph\Vertex.cpp" />
     <ClCompile Include="src\vehicles\Vehicle.cpp" />
     <ClCompile Include="src\vehicles\VehicleGenerator.cpp" />
+    <ClCompile Include="src\graph\Waypoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graph\Junction.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="src\graph\Vertex.h" />
     <ClInclude Include="src\vehicles\Vehicle.h" />
     <ClInclude Include="src\vehicles\VehicleGenerator.h" />
+    <ClInclude Include="src\graph\Waypoint.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PJC2025.rc" />

@@ -28,3 +28,13 @@ const Vector2 Edge::tangent() const
 {
 	return normalizedTangent(m_source->pos(), m_destination->pos());
 }
+
+void Edge::updateSource(Vertex* newSource)
+{
+	m_source = newSource;
+}
+
+void Edge::updateDestination(Vertex* newDestination)
+{
+	m_destination = newDestination;
+}

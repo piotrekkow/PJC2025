@@ -8,15 +8,15 @@ class Edge;
 
 class Vertex
 {
-	std::vector<Edge*> m_in;
-	std::vector<Edge*> m_out;
+protected:
 	Vector2 m_position;
 
 public:
 	Vertex(Vector2 position);
+	virtual ~Vertex() = default;
+
 	Vector2& pos();
 
-	void addIn(Edge* inEdge);
-	void addOut(Edge* outEdge);
-	const std::vector<Edge*>& out();
+	virtual void addIn(Edge* inEdge) = 0;
+	virtual void addOut(Edge* outEdge) = 0;
 };
