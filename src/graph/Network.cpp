@@ -50,8 +50,8 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vec
     {
         addEdge(source, destination);
     }
+    return nullptr;
 }
-
 
 Node* Network::addNode(Vector2 position, int laneCount, Vector2 tangent)
 {
