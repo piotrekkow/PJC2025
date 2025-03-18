@@ -90,6 +90,53 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination)
 	return edgePtr;
 }
 
+std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
+{
+	// function prerequisite: sources size must equal destiantions size
+	auto srcVertices{ srcNode->vertices() };
+	auto destVertices{ destNode->vertices() };
+	
+	if (std::ranges::distance(srcVertices) != std::ranges::distance(destVertices))
+		return {};
+
+	// function prerequisite: connect only through waypoints
+	for (const auto& source : srcVertices)
+	{
+		if (source->out())
+		{
+			return {};
+		}
+	}
+	for (const auto& destination : destVertices)
+	{
+		if (destination->in())
+		{
+			return {};
+		}
+	}
+
+	std::vector<Edge*> edgePtrs;
+
+	// if in straight line (as defined by tangent)
+	if ( /* collinear */)
+	{
+		for (int i = 0; i < sources->vertices().size(); ++i)
+		{
+			edgePtrs.push_back(addEdge(sources[i], destinations[i]));
+		}
+		return edgePtrs;
+	}
+	else if ( /* isValidAngle */ )
+	{
+		for (int i = 0; i < sources->vertices().size(); ++i)
+		{
+			edgePtrs.push_back(addEdge(sources[i], destinations[i], /*curve subdiv*/, sources->tangent(), destinations->tangent()));
+		}
+		return edgePtrs;
+	}
+	return
+}
+
 Edge* Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent)
 {
     Vector2 intersection;
