@@ -18,45 +18,31 @@ Junction* Network::addJunction(Vector2 position)
     return ptr;
 }
 
-Vertex* Network::ensureJunction(Vertex* vertex) {
-    // Check if it's already a Junction
-    if (dynamic_cast<Junction*>(vertex) != nullptr) {
-        return vertex;
-    }
-
-    // Need to convert - create a new Junction
-    auto waypoint = static_cast<Waypoint*>(vertex);
-    Vector2 position = waypoint->pos();
-
-    auto junction = std::make_unique<Junction>(position);
-    Junction* junctionPtr = junction.get();
-    
-    if (waypoint->in())
-    {
-        junctionPtr->addIn(waypoint->in());
-        waypoint->in()->updateDestination(junctionPtr);
-    }
-
-    if (waypoint->out())
-    {
-        junctionPtr->addOut(waypoint->out());
-        waypoint->out()->updateSource(junctionPtr);
-    }
-
-    m_junctions.push_back(std::move(junction));
-
-    // Remove the waypoint from m_waypoints
+Junction* Network::convertToJunction(Waypoint* waypoint)
+{
+	auto junction = std::make_unique<Junction>(waypoint->pos());
+	Junction* jctPtr = junction.get();
+	
+	if (waypoint->in())
+	{
+		jctPtr->addIn(waypoint->in());
+		waypoint->in()->updateDestination(jctPtr);
+	}
+	if (waypoint->out())
+	{
+		jctPtr->addOut(waypoint->out());
+		waypoint->out()->updateSource(jctPtr);
+	}
+	
+	// Remove from waypoints container
     auto it = std::remove_if(m_waypoints.begin(), m_waypoints.end(),
-        [waypoint](const std::unique_ptr<Waypoint>& wp){
+        [waypoint](const std::unique_ptr<Waypoint>& wp) {
             return wp.get() == waypoint;
         });
-
-    if (it != m_waypoints.end())
-    {
+    
+    if (it != m_waypoints.end()) {
         m_waypoints.erase(it, m_waypoints.end());
     }
-
-    return junctionPtr;
 }
 
 Edge* Network::addEdge(Vertex* source, Vertex* destination)
@@ -65,27 +51,42 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination)
 	{
 		return nullptr;
 	}
-    // Check if source or destination
-    if (Waypoint* srcWaypoint = dynamic_cast<Waypoint*>(source))
-    {
-        if (srcWaypoint->out() != nullptr)
-        {
-            source = ensureJunction(srcWaypoint);
-        }
-    }
-    if (Waypoint* destWaypoint = dynamic_cast<Waypoint*>(destination))
-    {
-        if (destWaypoint->in() != nullptr)
-        {
-            destination = ensureJunction(destWaypoint);
-        }
-    }
+	for (const auto& edge : m_edges)
+	{
+		if (edge->src() == source && edge->dest() == destination)
+		{
+			return edge.get();
+		}
+		if (edge->src() == destination && edge->dest() == source)
+		{
+			// remove edge
+			// add edge in opposite direction
+		}
+	}
 
 	auto edge = std::make_unique<Edge>(source, destination);
-	Edge* ptr = edge.get();
+	Edge* edgePtr = edge.get();
+
+	bool srcSuccess{ source->addOut(edge) };
+	bool destSuccess{ destination->addIn(edge) };
+
+	if (!srcSuccess)
+	{
+		Waypoint* waypoint{ static_cast<Waypoint*>(source) };
+        Junction* junction = convertToJunction(waypoint);
+        edgePtr->updateSource(junction);
+        junction->addOut(edgePtr);
+	}
+
+	if (!destSuccess)
+	{
+		Waypoint* waypoint{ static_cast<Waypoint*>(source) };
+		Junction* junction{ convertToJunction(waypoint) };
+		edgePtr->updateDestination(junction);
+		junction->addIn(edgePtr);
+	}
+
 	m_edges.push_back(std::move(edge));
-	source->addOut(ptr);
-	destination->addIn(ptr);
 	return ptr;
 }
 
