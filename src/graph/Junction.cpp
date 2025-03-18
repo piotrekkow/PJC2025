@@ -12,13 +12,13 @@ std::vector<Edge*> Junction::out() const
 	return m_out;
 }
 
-bool Waypoint::addIn(Edge* inEdge)
+bool Junction::addIn(Edge* inEdge)
 {
 	m_in.push_back(inEdge);
 	return true;
 }
 
-bool Waypoint::addOut(Edge* outEdge)
+bool Junction::addOut(Edge* outEdge)
 {
 	m_out.push_back(outEdge);
 	return true;
