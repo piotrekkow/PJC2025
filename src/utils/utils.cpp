@@ -113,7 +113,7 @@ float dotProduct(const Vector2& v1, const Vector2& v2)
 	return { v1.x * v2.x + v1.y * v2.y };
 }
 
-bool isCollinear(const Vector2& pos1, const Vector2& tan1, const Vector2& pos2, const Vector2& tan2, const float allignmentThreshold);
+bool isCollinear(const Vector2& pos1, const Vector2& tan1, const Vector2& pos2, const Vector2& tan2, const float allignmentThreshold)
 {
 	// check normalized vector between two positions against tangents
 	// directional (eg. if tan1 and tan2 are opposite then they're not considered collinear by this function)

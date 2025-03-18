@@ -17,6 +17,6 @@ public:
 
 	Vector2& pos();
 
-	virtual void addIn(Edge* inEdge) = 0;
-	virtual void addOut(Edge* outEdge) = 0;
+	virtual bool addIn(Edge* inEdge) = 0;
+	virtual bool addOut(Edge* outEdge) = 0;
 };
