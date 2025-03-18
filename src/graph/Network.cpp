@@ -87,7 +87,7 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination)
 	}
 
 	m_edges.push_back(std::move(edge));
-	return ptr;
+	return edgePtr;
 }
 
 Edge* Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent)
