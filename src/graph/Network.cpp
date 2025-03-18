@@ -117,8 +117,9 @@ std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
 
 	std::vector<Edge*> edgePtrs;
 
-	// if in straight line (as defined by tangent)
-	if ( /* collinear */)
+	const float threshold{ 0.99f };
+	bool collinear{ isCollinear(srcNode->pos(), srcNode->tangent(), destNode->pos(), srcNode->tangent(), threshold) };
+	if (collinear)
 	{
 		for (int i = 0; i < sources->vertices().size(); ++i)
 		{
@@ -126,11 +127,14 @@ std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
 		}
 		return edgePtrs;
 	}
-	else if ( /* isValidAngle */ )
+	else if (isCollinear(srcNode->pos(), srcNode->tangent(), destNode->pos(), srcNode->tangent(), -0.5f))
 	{
+		float dotTangents{ dotProduct(srcNode->tangent(), destNode->tangent()) };
+		int subdivisions // get subdivisions based on dotTangents and length between source and destination Node?
 		for (int i = 0; i < sources->vertices().size(); ++i)
 		{
-			edgePtrs.push_back(addEdge(sources[i], destinations[i], /*curve subdiv*/, sources->tangent(), destinations->tangent()));
+			auto edgePtr = addEdge(sources[i], destinations[i], subdivisions, sources->tangent(), destinations->tangent());
+			edgePtrs.push_back(edgePtr);
 		}
 		return edgePtrs;
 	}
