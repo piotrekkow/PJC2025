@@ -138,7 +138,7 @@ std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
 		}
 		return edgePtrs;
 	}
-	return
+	return {};
 }
 
 Edge* Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent)
