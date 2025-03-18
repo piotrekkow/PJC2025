@@ -92,53 +92,72 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination)
 
 std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
 {
-	// function prerequisite: sources size must equal destiantions size
-	auto srcVertices{ srcNode->vertices() };
-	auto destVertices{ destNode->vertices() };
-	
-	if (std::ranges::distance(srcVertices) != std::ranges::distance(destVertices))
-		return {};
+    // Function prerequisite: sources size must equal destinations size
+    auto srcVertices = srcNode->vertices();
+    auto destVertices = destNode->vertices();
+    
+    if (std::ranges::distance(srcVertices) != std::ranges::distance(destVertices))
+        return {};
 
-	// function prerequisite: connect only through waypoints
-	for (const auto& source : srcVertices)
-	{
-		if (source->out())
-		{
-			return {};
-		}
-	}
-	for (const auto& destination : destVertices)
-	{
-		if (destination->in())
-		{
-			return {};
-		}
-	}
+    // Function prerequisite: connect only through waypoints
+    for (const auto& source : srcVertices)
+    {
+        if (source->out())
+        {
+            return {};
+        }
+    }
+    for (const auto& destination : destVertices)
+    {
+        if (destination->in())
+        {
+            return {};
+        }
+    }
 
-	std::vector<Edge*> edgePtrs;
+    std::vector<Edge*> edgePtrs;
+    const float collinearThreshold = 0.99f;
+    const float validAngleThreshold = 0.0#f; // Allows connections within 90 degrees
 
-	const float threshold{ 0.99f };
-	bool collinear{ isCollinear(srcNode->pos(), srcNode->tangent(), destNode->pos(), srcNode->tangent(), threshold) };
-	if (collinear)
-	{
-		for (int i = 0; i < sources->vertices().size(); ++i)
-		{
-			edgePtrs.push_back(addEdge(sources[i], destinations[i]));
-		}
-		return edgePtrs;
-	}
-	else if (isCollinear(srcNode->pos(), srcNode->tangent(), destNode->pos(), srcNode->tangent(), -0.5f))
-	{
-		float dotTangents{ dotProduct(srcNode->tangent(), destNode->tangent()) };
-		int subdivisions // get subdivisions based on dotTangents and length between source and destination Node?
-		for (int i = 0; i < sources->vertices().size(); ++i)
-		{
-			auto edgePtr = addEdge(sources[i], destinations[i], subdivisions, sources->tangent(), destinations->tangent());
-			edgePtrs.push_back(edgePtr);
-		}
-		return edgePtrs;
-	}
-	return {};
+    // Check if nodes are collinear (on the same straight line)
+    bool collinear = isCollinear(srcNode->pos(), srcNode->tangent(), destNode->pos(), destNode->tangent(), collinearThreshold);
+    
+    if (collinear)
+    {
+        // Create straight edges
+        for (int i = 0; i < std::ranges::distance(srcVertices); ++i)
+        {
+            auto srcVertex = *(srcVertices.begin() + i);
+            auto destVertex = *(destVertices.begin() + i);
+            edgePtrs.push_back(addEdge(srcVertex, destVertex));
+        }
+        return edgePtrs;
+    }
+    else 
+    {
+        // Check if angle is valid for curved connection
+        float dotTangents = dotProduct(srcNode->tangent(), destNode->tangent());
+        if (dotTangents >= validAngleThreshold)
+        {
+            // Calculate appropriate subdivisions based on angle and distance
+            float distance = Vector2Distance(srcNode->pos(), destNode->pos());
+            float angle = acosf(dotTangents); // Angle between tangents
+            
+            // More subdivisions for greater angles or longer distances
+            int subdivisions = static_cast<int>(10 + (distance / 100.0f) + (angle * 10.0f / std::nubmers::piv<float>));
+            subdivisions = std::max(5, std::min(20, subdivisions));
+            
+            for (int i = 0; i < std::ranges::distance(srcVertices); ++i)
+            {
+                auto srcVertex = *(srcVertices.begin() + i);
+                auto destVertex = *(destVertices.begin() + i);
+                auto edgePtr = addEdge(srcVertex, destVertex, subdivisions, srcNode->tangent(), destNode->tangent());
+                if (edgePtr) edgePtrs.push_back(edgePtr);
+            }
+            return edgePtrs;
+        }
+    }
+    return {};
 }
 
 Edge* Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent)
