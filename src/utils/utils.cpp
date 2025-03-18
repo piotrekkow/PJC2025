@@ -65,13 +65,13 @@ bool operator==(const Vector2& v1, const Vector2& v2)
 {
     const float precision = 0.00001f; //! precyzja e-5
 
-    //! porÛwnywane wartoúci bliskie zeru
+    //! por√≥wnywane warto≈ìci bliskie zeru
     if (std::abs(v1.x) < precision && std::abs(v2.x) < precision &&
         std::abs(v1.y) < precision && std::abs(v2.y) < precision) {
         return true;
     }
 
-    //! pozosta≥e przypadki
+    //! pozosta¬≥e przypadki
     float xEpsilon = std::abs(std::max(std::abs(v1.x), std::abs(v2.x)) * precision);
     float yEpsilon = std::abs(std::max(std::abs(v1.y), std::abs(v2.y)) * precision);
 
@@ -106,4 +106,19 @@ bool lineIntersect(const Vector2& v1, const Vector2& tangent1, const Vector2& v2
     float s{ diff.x * tangent2.y - diff.y * tangent2.x };
     intersection = v1 + tangent1 * s;
     return true;
+}
+
+float dotProduct(const Vector2& v1, const Vector2& v2)
+{
+	return { v1.x * v2.x + v1.y * v2.y };
+}
+
+bool isCollinear(const Vector2& pos1, const Vector2& tan1, const Vector2& pos2, const Vector2& tan2, const float allignmentThreshold);
+{
+	// check normalized vector between two positions against tangents
+	// directional (eg. if tan1 and tan2 are opposite then they're not considered collinear by this function)
+	Vector2 normTangent{ normalizedTangent(pos1, pos2) };
+	float dot1{ dotProduct(normTangent, tan1) };
+	float dot2{ dotProduct(normTangent, tan2) };
+	return dot1 > allignmentThreshold && dot2 > allignmentThreshold;
 }
