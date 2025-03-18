@@ -23,8 +23,9 @@ class Network
 public:
 	Waypoint* addWaypoint(Vector2 position);
 	Junction* addJunction(Vector2 position);
- Junction* convertToJunction(Waypoint* waypoint);
+	Junction* convertToJunction(Waypoint* waypoint);
 	Edge* addEdge(Vertex* source, Vertex* destination);
+	std::vector<Edge*> addEdges(Node* sources, Node* destinations);
 	Edge* addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent); // adds a set of edges and vertices along a quadratic bezier curve, returns final edge
 	Node* addNode(Vector2 position, int laneCount, Vector2 tangent);
 
