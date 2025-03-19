@@ -21,8 +21,7 @@ Junction* Network::addJunction(Vector2 position)
 
 Junction* Network::convertToJunction(Waypoint* waypoint)
 {
-	auto junction = std::make_unique<Junction>(waypoint->pos());
-	Junction* jctPtr = junction.get();
+    Junction* jctPtr = addJunction(waypoint->pos());
 	
 	if (waypoint->in())
 	{
@@ -44,6 +43,7 @@ Junction* Network::convertToJunction(Waypoint* waypoint)
     if (it != m_waypoints.end()) {
         m_waypoints.erase(it, m_waypoints.end());
     }
+
     return jctPtr;
 }
 
@@ -82,7 +82,7 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination)
 
 	if (!destSuccess)
 	{
-		Waypoint* waypoint{ static_cast<Waypoint*>(source) };
+		Waypoint* waypoint{ static_cast<Waypoint*>(destination) };
 		Junction* junction{ convertToJunction(waypoint) };
 		edgePtr->updateDestination(junction);
 		junction->addIn(edgePtr);
