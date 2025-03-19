@@ -12,6 +12,18 @@ Edge* Waypoint::out() const
 	return m_out;
 }
 
+bool Waypoint::canAddIn()
+{
+	if (m_in) return false;
+	return true;
+}
+
+bool Waypoint::cadAddOut()
+{
+	if (m_out) return false;
+	return true;
+}
+
 bool Waypoint::addIn(Edge* inEdge)
 {
 	if (!m_in)

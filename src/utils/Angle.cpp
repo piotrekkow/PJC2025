@@ -1,5 +1,6 @@
 #include "Angle.h"
 #include <iostream>
+#include <cmath>
 
 Angle::Angle(std::uint16_t valueInt16) : m_valueInt16{ valueInt16 } {}
 Angle::Angle(float radians) : m_valueInt16{ radToInt16(radians) } {}
