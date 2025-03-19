@@ -18,7 +18,7 @@ bool Waypoint::canAddIn()
 	return true;
 }
 
-bool Waypoint::cadAddOut()
+bool Waypoint::canAddOut()
 {
 	if (m_out) return false;
 	return true;

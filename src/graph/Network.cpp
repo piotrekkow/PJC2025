@@ -1,6 +1,7 @@
 #include "Network.h"
 #include "QuadBezier.h"
 #include <memory>
+#include <numbers>
 
 Waypoint* Network::addWaypoint(Vector2 position)
 {
@@ -43,6 +44,7 @@ Junction* Network::convertToJunction(Waypoint* waypoint)
     if (it != m_waypoints.end()) {
         m_waypoints.erase(it, m_waypoints.end());
     }
+    return jctPtr;
 }
 
 Edge* Network::addEdge(Vertex* source, Vertex* destination)
@@ -67,8 +69,8 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination)
 	auto edge = std::make_unique<Edge>(source, destination);
 	Edge* edgePtr = edge.get();
 
-	bool srcSuccess{ source->addOut(edge) };
-	bool destSuccess{ destination->addIn(edge) };
+	bool srcSuccess{ source->addOut(edgePtr) };
+	bool destSuccess{ destination->addIn(edgePtr) };
 
 	if (!srcSuccess)
 	{
@@ -102,14 +104,14 @@ std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
     // Function prerequisite: connect only through waypoints
     for (const auto& source : srcVertices)
     {
-        if (source->out())
+        if (!source->canAddOut())
         {
             return {};
         }
     }
     for (const auto& destination : destVertices)
     {
-        if (destination->in())
+        if (!destination->canAddIn())
         {
             return {};
         }
@@ -117,7 +119,7 @@ std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
 
     std::vector<Edge*> edgePtrs;
     const float collinearThreshold = 0.99f;
-    const float validAngleThreshold = 0.0#f; // Allows connections within 90 degrees
+    const float validAngleThreshold = 0.0f; // Allows connections within 90 degrees
 
     // Check if nodes are collinear (on the same straight line)
     bool collinear = isCollinear(srcNode->pos(), srcNode->tangent(), destNode->pos(), destNode->tangent(), collinearThreshold);
@@ -144,7 +146,7 @@ std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
             float angle = acosf(dotTangents); // Angle between tangents
             
             // More subdivisions for greater angles or longer distances
-            int subdivisions = static_cast<int>(10 + (distance / 100.0f) + (angle * 10.0f / std::nubmers::piv<float>));
+            int subdivisions = static_cast<int>(10 + (distance / 100.0f) + (angle * 10.0f / std::numbers::pi_v<float>));
             subdivisions = std::max(5, std::min(20, subdivisions));
             
             for (int i = 0; i < std::ranges::distance(srcVertices); ++i)
@@ -177,7 +179,7 @@ Edge* Network::addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vec
             }
             else
             {
-                Vertex* newVertex{ addVertex(point) };
+                Vertex* newVertex{ addWaypoint(point) };
                 addEdge(currentVertex, newVertex);
                 currentVertex = newVertex;
             }
@@ -243,27 +245,27 @@ void Network::drawArrow(Vector2& start, Vector2& end, float lineWidth, Color col
     DrawLineEx(arrowBase, arrowBase + rightWing, lineWidth, color);
 }
 
-/*
-std::vector<Vehicle*> Network::getVehiclesOnEdge(Edge* edge) const
-{
-    auto it = m_edgeVehicleMap.find(edge);
-    if (it != m_edgeVehicleMap.end()) {
-        return it->second;
-    }
-    return {}; // Empty vector if no vehicles on this edge
-}
-*/
 void Network::draw(bool debug)
 {
-    for (auto& vertex : m_vertices)
+    for (auto& waypoint : m_waypoints)
     {
-        for (auto& edge : vertex->out())
+        if (waypoint->out())
         {
-            Vector2 start = vertex->pos();
+            Vector2 start = waypoint->pos();
+            Vector2 end = waypoint->out()->dest()->pos();
+            drawArrow(start, end, 2.0f, EDGE_COLOR);
+        }
+        DrawCircleV(waypoint->pos(), VERTEX_RADIUS, GREEN);
+    }
+    for (auto& junction : m_junctions)
+    {
+        for (auto& edge : junction->out())
+        {
+            Vector2 start = junction->pos();
             Vector2 end = edge->dest()->pos();
             drawArrow(start, end, 2.0f, EDGE_COLOR);
         }
-        DrawCircleV(vertex->pos(), VERTEX_RADIUS, VERTEX_COLOR);
+        DrawCircleV(junction->pos(), VERTEX_RADIUS, DARKGREEN);
     }
 
     if (debug)

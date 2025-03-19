@@ -12,6 +12,16 @@ std::vector<Edge*> Junction::out() const
 	return m_out;
 }
 
+bool Junction::canAddIn()
+{
+	return true; // Junctions can have multiple incoming edges
+}
+
+bool Junction::canAddOut()
+{
+	return true; // Junctions can have multiple outgoing edges
+}
+
 bool Junction::addIn(Edge* inEdge)
 {
 	m_in.push_back(inEdge);

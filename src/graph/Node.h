@@ -23,6 +23,7 @@ public:
 	std::ranges::view auto vertices() const {
 		return m_vertices | std::views::transform([](Vertex* vertex) { return vertex; });
 	}
+	Vector2 tangent();
 
 private:
 	Vector2 normal();

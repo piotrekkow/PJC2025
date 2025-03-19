@@ -1,5 +1,10 @@
 #include "Node.h"
 
+Vector2 Node::tangent()
+{
+	return m_tangent;
+}
+
 Vector2 Node::normal() { return { -m_tangent.y, m_tangent.x }; }
 
 void Node::fillNode()
@@ -8,7 +13,7 @@ void Node::fillNode()
 	Vector2 cursor{ m_position - step * static_cast<float>(m_laneCount - 1) / 2 };
 	for (int i = 0; i < m_laneCount; ++i)
 	{
-		Vertex* v = m_network.addVertex(cursor);
+		Vertex* v = m_network.addWaypoint(cursor);
 		m_vertices.push_back(v);
 		cursor += step;
 	}
