@@ -15,7 +15,6 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Create executable
 add_executable(${PROJECT_NAME} ${SOURCES})
-add_subdirectory(spdlog)
 
 # Add ALL src subdirectories to the include path globally
 file(GLOB SUBDIRS LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/src/*")
@@ -37,4 +36,9 @@ endif()
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::)
+
+# spdlog
+if(EXISTS "${CMAKE_SOURCE_DIR}/spdlog/CMakeLists.txt")
+    add_subdirectory(spdlog)
+    target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
+endif()
