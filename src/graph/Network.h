@@ -24,7 +24,7 @@ class Network
 	template<typename VertexType, typename... Args>
 	int createVertex(Args&&... args)
 	{
-		auto vertex = std::make_unique<VertexType>(std::forward<Args>(args)...);
+		auto vertex = std::make_unique<VertexType>(m_nextVertId, std::forward<Args>(args)...);
 		m_vertices[m_nextVertId] = std::unique_ptr<Vertex>(vertex.release());
 		std::cout << "Added vertex " << m_nextVertId << '\n';
 		return m_nextVertId++;

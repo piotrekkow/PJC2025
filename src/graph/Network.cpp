@@ -5,12 +5,12 @@
 
 int Network::addWaypoint(Vector2 position)
 {
-    return createVertex<Waypoint>(m_nextVertId, position);
+    return createVertex<Waypoint>(position);
 }
 
 int Network::addJunction(Vector2 position)
 {
-    return createVertex<Junction>(m_nextVertId, position);
+    return createVertex<Junction>(position);
 }
 
 int Network::convertToJunction(int waypointId)
@@ -43,8 +43,18 @@ int Network::convertToJunction(int waypointId)
         junctionPtr->addOut(outEdge);
         outEdge->updateSource(junctionPtr);
     }
-
-    std::cout << "Converted waypoint " << waypointId << " to junction.\n";
+    
+    std::cout << "Junction " << junctionPtr->id() << " now connected to ";
+    for (auto& out : junctionPtr->out())
+    {
+        std::cout << out->dest()->id() << ' ';
+    }
+    std::cout << " and from ";
+    for (auto& in : junctionPtr->in())
+    {
+        std::cout << in->src()->id() << ' ';
+    }
+    std::cout << "\n";
     return waypointId;
 }
 
@@ -54,20 +64,30 @@ int Network::addEdge(int sourceId, int destinationId)
     Vertex* destination{ m_vertices[destinationId].get() };
 
     int edgeCheck{ checkForEdge(source, destination) };
-    if (edgeCheck > -1) return edgeCheck;    // check for existing edge with the same source and destination
-    else if (edgeCheck < -1) return -1; // invalid parameters
+    if (edgeCheck > -1) return edgeCheck;       // check for existing edge with the same source and destination
+    else if (edgeCheck < -1) return -1;         // invalid parameters
 
     int edgeId = m_nextEdgeId++;
     auto edge = std::make_unique<Edge>(edgeId, source, destination);
     Edge* edgePtr = edge.get();
     m_edges[edgeId] = std::move(edge);
 
-    // check if adding an edge is successful (eg do we need to change Waypoint to Junction)
-    bool srcSuccess{ source->addOut(edgePtr) };
-    bool destSuccess{ destination->addIn(edgePtr) };
+    // update target vertices - if waypoints full convert to junctions
+    if (!source->canAddOut())
+    {
+        convertToJunction(sourceId);
+        source = m_vertices[sourceId].get();
+        edgePtr->updateSource(source);
+    }
+    source->addOut(edgePtr);
 
-    if (!srcSuccess) convertToJunction(sourceId);
-    if (!destSuccess) convertToJunction(destinationId);
+    if (!destination->canAddIn())
+    {
+        convertToJunction(destinationId);
+        destination = m_vertices[destinationId].get();
+        edgePtr->updateDestination(destination);
+    }
+    destination->addIn(edgePtr);
 
     std::cout << "Added edge " << edgeId << " between vertices " << sourceId << ", " << destinationId << '\n';
     return edgeId;

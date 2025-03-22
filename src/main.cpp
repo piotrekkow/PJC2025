@@ -23,16 +23,17 @@ int main()
 	// std::deque<Edge*> path2 = { network.addEdge(n4->vertices()[0], n3->vertices()[0]) };
 	// network.addEdge(network.addWaypoint({ 600,400 }), network.addWaypoint({ 900,100 }), 12, { 1,0 }, { 0,1 });
 	
-	int w1 = network.addWaypoint({ 800, 200 });
-	int w2 = network.addWaypoint({ 900, 300 });
-	int w3 = network.addWaypoint({ 700, 150 });
-	int w4 = network.addWaypoint({ 800, 300 });
+	int w1 = network.addWaypoint({ 200, 200 });
+	int w2 = network.addWaypoint({ 400, 200 });
+	int w3 = network.addWaypoint({ 200, 1000 });
+	int w4 = network.addWaypoint({ 1000, 1000 });
 
 	// Junction* w2 = network.addJunction({ 950, 300 });
 
 	network.addEdge(w1, w2);
-	network.addEdge(w3, w2);
-	network.addEdge(w2, w4);
+	network.addEdge(w2, w3);
+	network.addEdge(w3, w1);
+	network.addEdge(w3, w4);
 
 	
 
