@@ -2,8 +2,9 @@
 #include "utils.h"
 
 
-Edge::Edge(Vertex* source, Vertex* destination)
-	: m_source{ source }
+Edge::Edge(int id, Vertex* source, Vertex* destination)
+	: m_id{ id }
+	, m_source { source }
 	, m_destination{ destination }
 {
 	m_length = length();
@@ -37,4 +38,9 @@ void Edge::updateSource(Vertex* newSource)
 void Edge::updateDestination(Vertex* newDestination)
 {
 	m_destination = newDestination;
+}
+
+const int Edge::id() const
+{
+	return m_id;
 }

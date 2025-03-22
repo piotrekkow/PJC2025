@@ -1,6 +1,6 @@
 #include "Waypoint.h"
 
-Waypoint::Waypoint(Vector2 position) : Vertex(position) {}
+Waypoint::Waypoint(int id, Vector2 position) : Vertex(id, position) {}
 
 Edge* Waypoint::in() const
 {

@@ -7,7 +7,7 @@ class Junction :
     std::vector<Edge*> m_out;
 
 public:
-    Junction(Vector2 position);
+    Junction(int id, Vector2 position);
     std::vector<Edge*> in() const;
     std::vector<Edge*> out() const;
     bool canAddIn() override;

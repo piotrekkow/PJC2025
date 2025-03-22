@@ -6,25 +6,25 @@ class Network;
 
 class Vehicle
 {
-    // Path m_path;
-    Network& m_network;
-    std::deque<Edge*> m_path;
-    float m_speed{ 0.0f };
-    float m_maxSpeed{ 11.0f };
-    float m_acceleration{ 1.5f };
-    float m_deceleration{ 3.0f };
-    Vector2 m_size{ 20.0f, 8.0f };  // length, width
-    Edge* m_currentEdge{ nullptr };
-    float m_distanceAlongEdge{ 0.0f };
-
-public:
-    Vehicle(Network& network, std::deque<Edge*> path, float initialSpeed);
-    void update(float deltaTime);
-    void draw();
-    Edge* edge() const;
-
-private:
-    Vector2 position();
+//    // Path m_path;
+//    Network& m_network;
+//    std::deque<Edge*> m_path;
+//    float m_speed{ 0.0f };
+//    float m_maxSpeed{ 11.0f };
+//    float m_acceleration{ 1.5f };
+//    float m_deceleration{ 3.0f };
+//    Vector2 m_size{ 20.0f, 8.0f };  // length, width
+//    Edge* m_currentEdge{ nullptr };
+//    float m_distanceAlongEdge{ 0.0f };
+//
+//public:
+//    Vehicle(Network& network, std::deque<Edge*> path, float initialSpeed);
+//    void update(float deltaTime);
+//    void draw();
+//    Edge* edge() const;
+//
+//private:
+//    Vector2 position();
 };
 
 
