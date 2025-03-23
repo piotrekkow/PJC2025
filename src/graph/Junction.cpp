@@ -33,3 +33,25 @@ bool Junction::addOut(Edge* outEdge)
 	m_out.push_back(outEdge);
 	return true;
 }
+
+bool Junction::removeIn(Edge* inEdge)
+{
+    auto it = std::find(m_in.begin(), m_in.end(), inEdge);
+    if (it != m_in.end())
+    {
+        m_in.erase(it);
+        return true;
+    }
+    return false;
+}
+
+bool Junction::removeOut(Edge* outEdge)
+{
+    auto it = std::find(m_out.begin(), m_out.end(), outEdge);
+    if (it != m_out.end())
+    {
+        m_out.erase(it);
+        return true;
+    }
+    return false;
+}

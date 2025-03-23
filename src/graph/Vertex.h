@@ -23,4 +23,6 @@ public:
 	virtual bool canAddOut() = 0;
 	virtual bool addIn(Edge* inEdge) = 0;
 	virtual bool addOut(Edge* outEdge) = 0;
+	virtual bool removeIn(Edge* inEdge) = 0;
+	virtual bool removeOut(Edge* outEdge) = 0;
 };

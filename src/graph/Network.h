@@ -33,11 +33,12 @@ class Network
 public:
 	int addWaypoint(Vector2 position);
 	int addJunction(Vector2 position);
-	int convertToJunction(int waypointId);
-	int addEdge(int sourceId, int destinationId);
+	int addEdge(int sourceId, int destinationId); // edge between two existing vertices
+	std::vector<int> addEdgeEx(int sourceId, int destinationId); // edge between two existing vertices checking for and adding junctions when crossing existing edges
 	//std::vector<Edge*> addEdges(Node* sources, Node* destinations);
 	//Edge* addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent); // adds a set of edges and vertices along a quadratic bezier curve, returns final edge
 	//Node* addNode(Vector2 position, int laneCount, Vector2 tangent);
+	bool removeEdge(int edgeId);
 
 	void draw(bool debug);
 	//auto nodes() const;
@@ -48,5 +49,7 @@ public:
 private:
 	void drawArrow(Vector2& start, Vector2& end, float lineWidth, Color color);
 	int checkForEdge(Vertex* source, Vertex* destination);
+	int convertToJunction(int waypointId);
+	int convertToWaypoint(int junctionId);
 };
 

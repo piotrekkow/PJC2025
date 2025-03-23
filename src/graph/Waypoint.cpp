@@ -43,3 +43,23 @@ bool Waypoint::addOut(Edge* outEdge)
 	}
 	return false;
 }
+
+bool Waypoint::removeIn(Edge* inEdge)
+{
+	if (m_in == inEdge)
+	{
+		m_in = nullptr;
+		return true;
+	}
+	return false;
+}
+
+bool Waypoint::removeOut(Edge* outEdge)
+{
+	if (m_out == outEdge)
+	{
+		m_out = nullptr;
+		return true;
+	}
+	return false;
+}

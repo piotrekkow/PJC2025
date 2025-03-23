@@ -94,23 +94,51 @@ Vector2 operator-(const Vector2& v)
     return { -v.x, -v.y };
 }
 
-bool lineIntersect(const Vector2& v1, const Vector2& tangent1, const Vector2& v2, const Vector2& tangent2, Vector2& intersection)
+std::optional<Vector2> lineIntersect(const Vector2& v1, const Vector2& tangent1, const Vector2& v2, const Vector2& tangent2)
 {
-    float det = tangent1.x * tangent2.y - tangent1.y * tangent2.x;
+    float det{ determinant(tangent1, tangent2) };
     if (std::abs(det) < 1e-5f)
     {
-        return false; // lines parallel
+        return std::nullopt; // lines parallel
     }
         
     Vector2 diff{ v2 - v1 };
     float s{ diff.x * tangent2.y - diff.y * tangent2.x };
-    intersection = v1 + tangent1 * s;
-    return true;
+    return { v1 + tangent1 * s };
+}
+
+std::optional<Vector2> lineIntersectCap(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2)
+{
+    // direction vectors
+    Vector2 r{ p2 - p1 };
+    Vector2 s{ q2 - q1 };
+
+    float det{ determinant(r, s) };
+    if (std::abs(det) < 1e-5f)
+    {
+        return std::nullopt; // lines parallel
+    }
+
+    Vector2 c = q1 - p1;
+    float t = determinant(c, s) / det;
+    float u = determinant(c, r) / det;
+
+    // Check if intersection is within both line segments
+    if (t >= 0.0f && t <= 1.0f && u >= 0.0f && u <= 1.0f)
+    {
+        return p1 + r * t; // Return intersection point
+    }
+    return std::nullopt;
 }
 
 float dotProduct(const Vector2& v1, const Vector2& v2)
 {
 	return { v1.x * v2.x + v1.y * v2.y };
+}
+
+float determinant(const Vector2& v1, const Vector2& v2)
+{
+    return { v1.x * v2.y - v1.y * v2.x };
 }
 
 bool isCollinear(const Vector2& pos1, const Vector2& tan1, const Vector2& pos2, const Vector2& tan2, const float allignmentThreshold)

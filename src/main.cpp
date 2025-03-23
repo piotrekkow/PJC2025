@@ -27,13 +27,16 @@ int main()
 	int w2 = network.addWaypoint({ 400, 200 });
 	int w3 = network.addWaypoint({ 200, 1000 });
 	int w4 = network.addWaypoint({ 1000, 1000 });
+	int w5 = network.addWaypoint({ 700, 300 });
+	int w6 = network.addWaypoint({ 100, 800 });
 
-	// Junction* w2 = network.addJunction({ 950, 300 });
+	network.addEdge(w1, w4);
+	network.addEdgeEx(w2, w3);
+	network.addEdgeEx(w6, w5);
+	network.addEdgeEx(w5, w3);
 
-	network.addEdge(w1, w2);
-	network.addEdge(w2, w3);
-	network.addEdge(w3, w1);
-	network.addEdge(w3, w4);
+	//network.addEdge(w3, w1);
+	//network.addEdge(w3, w4);
 
 	
 
@@ -49,7 +52,7 @@ int main()
 		ClearBackground(RAYWHITE);
 		//curve.drawBezier();
 		// float delta = GetFrameTime();
-		network.draw(true);
+		network.draw(false);
 		// car.update(delta);
 		// car2.update(delta);
 		// car.draw();

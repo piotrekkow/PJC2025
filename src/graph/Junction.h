@@ -14,4 +14,6 @@ public:
     bool canAddOut() override;
     bool addIn(Edge* inEdge) override;
     bool addOut(Edge* outEdge) override;
+    bool removeIn(Edge* inEdge) override;
+    bool removeOut(Edge* outEdge) override;
 };

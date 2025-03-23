@@ -2,6 +2,8 @@
 #include "QuadBezier.h"
 #include <memory>
 #include <numbers>
+#include <algorithm> // std::sort
+#include <string>
 
 int Network::addWaypoint(Vector2 position)
 {
@@ -17,18 +19,16 @@ int Network::convertToJunction(int waypointId)
 {
     auto it = m_vertices.find(waypointId);
     if (it == m_vertices.end()) return -1;
-    auto& waypointPtr = m_vertices[waypointId];
-    Waypoint* waypoint = dynamic_cast<Waypoint*>(waypointPtr.get());
+    auto& waypointPtr{ m_vertices[waypointId] };
+    Waypoint* waypoint{ dynamic_cast<Waypoint*>(waypointPtr.get()) };
     if (!waypoint)
-    {
         return -1;  // not waypoint
-    }
 
     auto junction = std::make_unique<Junction>(waypointId, waypoint->pos());
     Junction* junctionPtr = junction.get();
     
-    Edge* inEdge = waypoint->in();
-    Edge* outEdge = waypoint->out();
+    Edge* inEdge{ waypoint->in() };
+    Edge* outEdge{ waypoint->out() };
 
     m_vertices[waypointId] = std::unique_ptr<Vertex>(junction.release());
 
@@ -56,6 +56,40 @@ int Network::convertToJunction(int waypointId)
     }
     std::cout << "\n";
     return waypointId;
+}
+
+int Network::convertToWaypoint(int junctionId)
+{
+    auto it = m_vertices.find(junctionId);
+    if (it == m_vertices.end()) return -1;
+    auto& junctionPtr{ m_vertices[junctionId] };
+    Junction* junction{ dynamic_cast<Junction*>(junctionPtr.get()) };
+    if (!junction)
+        return -1; // not junction
+    if (junction->in().size() > 1 || junction->out().size() > 1) 
+        return -1; // cannot turn a junction serving multiple edges into waypoint 
+
+    auto waypoint = std::make_unique<Waypoint>(junctionId, junction->pos());
+    Waypoint* waypointPtr = waypoint.get();
+    
+    Edge* inEdge{ junction->in()[0] };
+    Edge* outEdge{ junction->out()[0] };
+
+    m_vertices[junctionId] = std::unique_ptr<Vertex>(waypoint.release());
+
+    if (inEdge)
+    {
+        junctionPtr->addIn(inEdge);
+        inEdge->updateDestination(waypointPtr);
+    }
+
+    if (outEdge)
+    {
+        junctionPtr->addOut(outEdge);
+        outEdge->updateSource(waypointPtr);
+    }
+
+    return junctionId;
 }
 
 int Network::addEdge(int sourceId, int destinationId)
@@ -91,6 +125,79 @@ int Network::addEdge(int sourceId, int destinationId)
 
     std::cout << "Added edge " << edgeId << " between vertices " << sourceId << ", " << destinationId << '\n';
     return edgeId;
+}
+
+std::vector<int> Network::addEdgeEx(int sourceId, int destinationId)
+{
+    Vertex* source{ m_vertices[sourceId].get() };
+    Vertex* destination{ m_vertices[destinationId].get() };
+
+    Vector2 newEdgeTangent{ normalizedTangent(source->pos(), destination->pos()) };
+
+    if (!source || !destination) return {};
+
+    struct EdgePositionPair
+    {
+        int edgeId{};
+        Vector2 pos{};
+        EdgePositionPair(int id, Vector2 position) : edgeId{ id }, pos{ position } {}
+    };
+
+    std::vector<EdgePositionPair> edgePositions{};
+    for (const auto& [eId, edge] : m_edges)
+    {
+        if (auto intersection{ lineIntersectCap(source->pos(), destination->pos(), edge->src()->pos(), edge->dest()->pos()) })
+        {
+            std::cout << "Found intersection at " << (*intersection).x << ", " << (*intersection).y << '\n';
+            edgePositions.push_back(EdgePositionPair(eId, *intersection));
+        }
+    }
+
+    std::sort(edgePositions.begin(), edgePositions.end(),
+        [source](const EdgePositionPair& a, const EdgePositionPair& b) {
+            return Vector2Distance(source->pos(), a.pos) < Vector2Distance(source->pos(), b.pos);
+        });
+
+    std::vector<int> addedEdges{};
+    if (edgePositions.empty())
+    {
+        addedEdges.push_back(addEdge(sourceId, destinationId));
+        std::cout << "edgePositions empty\n";
+        return addedEdges;
+    }
+
+    int lastJunction{ -1 };
+    for (auto& edgePos : edgePositions)
+    {
+        int edgeId{ edgePos.edgeId };
+        Vector2 intersectionPos{ edgePos.pos };
+
+        int altSource{ m_edges[edgeId]->src()->id() };
+        int altDestination{ m_edges[edgeId]->dest()->id() };
+
+        if (!removeEdge(edgeId)) return {};
+
+        int newJunction{ addJunction(intersectionPos) };
+
+        if (lastJunction == -1)
+        {
+            addedEdges.push_back(addEdge(sourceId, newJunction));
+        }
+        else
+        {
+            addedEdges.push_back(addEdge(lastJunction, newJunction));
+        }
+
+        addedEdges.push_back(addEdge(altSource, newJunction));
+        addedEdges.push_back(addEdge(newJunction, altDestination));
+
+        if (edgeId == edgePositions.back().edgeId)
+        {
+            addedEdges.push_back(addEdge(newJunction, destinationId));
+        }
+        lastJunction = newJunction;
+    }
+    return addedEdges;
 }
 
 //std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
@@ -268,6 +375,42 @@ int Network::checkForEdge(Vertex* source, Vertex* destination)
     return -3; // source of unknown type
 }
 
+bool Network::removeEdge(int edgeId)
+{
+    auto it = m_edges.find(edgeId);
+    if (it == m_edges.end()) {
+        std::cout << "Edge " << edgeId << " not found." << '\n';
+        return false; // Edge not found
+    }
+
+    Edge* edge = it->second.get();
+
+    // Get the source and destination vertices
+    Vertex* source = edge->src();
+    Vertex* destination = edge->dest();
+
+    // Remove the edge references from the source and destination vertices
+    bool removedFromSource = source->removeOut(edge);
+    bool removedFromDest = destination->removeIn(edge);
+
+    // Check whether can trim Junction into Waypoint after removing an edge
+    convertToWaypoint(source->id());
+    convertToWaypoint(destination->id());
+
+    // Check if removal was successful
+    if (!removedFromSource || !removedFromDest) {
+        std::cout << "Failed to completely remove edge " << edgeId << " from vertices." << '\n';
+        return false;
+    }
+
+    // Remove the edge from the map
+    m_edges.erase(it);
+
+    std::cout << "Removed edge " << edgeId << " between vertices " << source->id() << " and " << destination->id() << '\n';
+
+    return true;
+}
+
 void Network::draw(bool debug)
 {
     for (auto& [id, vertex] : m_vertices)
@@ -278,9 +421,15 @@ void Network::draw(bool debug)
             {
                 Vector2 start = waypoint->pos();
                 Vector2 end = waypoint->out()->dest()->pos();
-                drawArrow(start, end, 2.0f, EDGE_COLOR);
+                if (debug) drawArrow(start, end, 2.0f, EDGE_COLOR);
+                else DrawLineEx(start, end, LANE_WIDTH, ROAD_COLOR);
             }
-            DrawCircleV(waypoint->pos(), VERTEX_RADIUS, GREEN);
+            if (debug)
+            {
+                DrawCircleV(waypoint->pos(), VERTEX_RADIUS, GREEN);
+                std::string wid = std::to_string(waypoint->id());
+                DrawText(wid.c_str(), static_cast<int>(waypoint->pos().x) + 5, static_cast<int>(waypoint->pos().y) + 5, 20, BLACK);
+            }
         }
         if (Junction* junction = dynamic_cast<Junction*>(vertex.get()))
         {
@@ -288,9 +437,15 @@ void Network::draw(bool debug)
             {
                 Vector2 start = junction->pos();
                 Vector2 end = edge->dest()->pos();
-                drawArrow(start, end, 2.0f, EDGE_COLOR);
+                if (debug) drawArrow(start, end, 2.0f, EDGE_COLOR);
+                else DrawLineEx(start, end, LANE_WIDTH, ROAD_COLOR);
             }
-            DrawCircleV(junction->pos(), VERTEX_RADIUS, DARKGREEN);
+            if (debug)
+            {
+                DrawCircleV(junction->pos(), VERTEX_RADIUS, DARKGREEN);
+                std::string jid = std::to_string(junction->id());
+                DrawText(jid.c_str(), static_cast<int>(junction->pos().x) + 5, static_cast<int>(junction->pos().y) + 5, 20, BLACK);
+            }
         }
         if (debug)
         {
