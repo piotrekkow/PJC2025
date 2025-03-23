@@ -299,15 +299,16 @@ std::vector<int> Network::addEdgeEx(int sourceId, int destinationId)
 //    }
 //    return nullptr;
 //}
-//
-//Node* Network::addNode(Vector2 position, int laneCount, Vector2 tangent)
-//{
-//	auto node = std::make_unique<Node>(*this, position, laneCount, tangent);
-//	Node* ptr = node.get();
-//    m_nodes[m_nextNode] = std::unique_ptr<Node>(node.release());
-//	return ptr;
-//}
-///*
+
+int Network::addNode(Vector2 position, int laneCount, Vector2 tangent)
+{
+	auto node = std::make_unique<Node>(*this, position, laneCount, tangent);
+    m_nodes[m_nextNodeId] = std::unique_ptr<Node>(node.release());
+    std::cout << "Added vertex " << m_nextNodeId << '\n';
+	return m_nextNodeId++;
+}
+
+//*
 //Segment* Network::addSegment()
 //{
 //

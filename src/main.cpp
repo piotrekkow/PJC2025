@@ -35,6 +35,8 @@ int main()
 	network.addEdgeEx(w6, w5);
 	network.addEdgeEx(w5, w3);
 
+	network.addNode({ 500, 500 }, 4, { 1, 0 });
+
 	//network.addEdge(w3, w1);
 	//network.addEdge(w3, w4);
 
@@ -52,7 +54,7 @@ int main()
 		ClearBackground(RAYWHITE);
 		//curve.drawBezier();
 		// float delta = GetFrameTime();
-		network.draw(false);
+		network.draw(true);
 		// car.update(delta);
 		// car2.update(delta);
 		// car.draw();

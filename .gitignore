@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # Doxygen
 /html
 /latex
+
+# Note
+note.md
