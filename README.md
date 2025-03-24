@@ -59,16 +59,15 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
   - Wydajne wyszukiwanie pojazdów przez ID
   - Generowanie ruchu z konfigurowalnymi parametrami
 
-- `AgentGenerator`: Generuje agentów z określoną ścieżką w danym wierzchołku/miejscu
-
-- System Pojazdów:
-  - `Agent`: Abstrakcyjna klasa bazowa dla wszystkich typów agentów
-    - Pozycja, prędkość i wymiary fizyczne
-    - Możliwości podążania wzdłuż ścieżki
-  - Konkretne typy agentów:
-    - `Vehicle`: Abstrakcyjna klasa bazowa dla wszystkich typów pojazdów
-        - `Car`: Zwykły samochód osobowy
-        - `Truck`: Większy pojazd o innych właściwościach fizycznych
+- `AgentGenerator`: Generuje agentów z określoną ścieżką w danym wierzchołku/miejscu. 
+  
+- `Agent`: Abstrakcyjna klasa bazowa dla wszystkich typów agentów
+  - Pozycja, prędkość i wymiary fizyczne
+  - Możliwości podążania wzdłuż ścieżki
+- Konkretne typy agentów - Pojazdy:
+  - `Vehicle`: Abstrakcyjna klasa bazowa dla wszystkich typów pojazdów
+    - `Car`: Zwykły samochód osobowy
+    - `Truck`: Większy pojazd o innych właściwościach fizycznych
   
 - System Zachowań:
   - `DriverBehavior`: Enkapsuluje logikę decyzji kierowcy
