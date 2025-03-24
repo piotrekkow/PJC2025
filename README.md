@@ -18,8 +18,8 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
   - Obsługuje funkcjonalność pauzy/wznowienia
   - Koordynuje aktualizacje we wszystkich podsystemach
 - `Config`: Konfiguracja zawierająca parametry symulacji
-  - Wymiary okna, nazwa symulacji, zmienne constexpr używane globalnie (na przykład kolory)
-- `Renderer`: System renderowania wykorzystujący raylib
+  - Wymiary okna, nazwa symulacji, zmienne używane globalnie
+- `Renderer`: System renderowania poszczególnych obiektów wykorzystujący raylib
 
 ### 2. Zarządzanie ID
 - `EntityId`: Klasa łącząca typ encji zdefiniowany w EnitityType i numer id
@@ -44,7 +44,7 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
   - `Vertex`: Reprezentuje wierzchołek, punkt w sieci z danymi pozycji
     - `Waypoint`: Maks. 1 krawędź wchodząca i wychodząca
     - `Junction`: Wiele krawędzi wchodzących lub wychodzących
-  - `Edge`: Krawędź, łączy wierzchołki i reprezentuje pasy ruchu
+  - `Edge`: Krawędź, łączy wierzchołki i reprezentuje pas ruchu
     - Połączenie kierunkowe
 
 - System węzłów:
