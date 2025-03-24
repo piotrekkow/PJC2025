@@ -6,6 +6,8 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
 - Język: C++
 - Grafika: raylib, 2D
 - Paradygmat: Programowanie obiektowe
+- Środowisko programowania: MSVC
+- Repozytorium: Github
 - Dodatki: CMake oraz pliki w .vscode, .devcontainer pozwalają kompilować kod na Github Codespaces (pracę zdalną na tablecie)
 
 ## Główne składowe projektu
