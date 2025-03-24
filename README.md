@@ -1,4 +1,4 @@
-﻿# Symulacja Ruchu Drogowego
+# Symulacja Ruchu Drogowego
 
 Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co najwyżej kilku skrzyżowaniach jednocześnie. Docelowo ma dosyć realistycznie odwzorowywać ruch - inspiracją jest PTV Vissim.
 
@@ -29,23 +29,23 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
   - Agenci (VEHICLE, PEDESTRIAN, itp.)
 - `IdGenerator`: Generowanie ID
   - Zarządzanie licznikami dla każdego typu encji
-- `BaseEntity`: Abstrakcyjna klasa bazowa dla wszystkich identyfikowalnych obiektów
+- `Entity`: Abstrakcyjna klasa bazowa dla wszystkich identyfikowalnych obiektów
   - Automatyczne przypisanie ID przez konstruktor
   - Możliwości sprawdzenia typu
 
-### 3. Infrastruktura (Sieć Oparta na Grafie)
+### 3. Infrastruktura (Sieć oparta na grafie)
 - `TrafficNetwork`: Menedżer dla wszystkich komponentów infrastruktury
   - Wyszukiwanie encji przez ID
-  - Dodawanie, usuwanie komponentów infrastruktury
+  - Dodawanie, usuwanie encji infrastruktury
 
-- System Wierzchołków:
-  - `Vertex`: Reprezentuje punkt w sieci z danymi pozycji
+- System wierzchołków:
+  - `Vertex`: Reprezentuje wierzchołek, punkt w sieci z danymi pozycji
     - `Waypoint`: Maks. 1 krawędź wchodząca i wychodząca
     - `Junction`: Wiele krawędzi wchodzących lub wychodzących
   - `Edge`: Krawędź, łączy wierzchołki i reprezentuje pasy ruchu
     - Połączenie kierunkowe
 
-- System Węzłów (Abstrakcja Wyższego Poziomu):
+- System węzłów:
   - `Node`: Węzęł, grupa wierzchołków w z ustaloną pozycją odniesienia
     - Funkcjonuje jako punkty decyzyjne dla trasowania
     - Może istnieć na wlotach/wylotach skrzyżowań
@@ -53,22 +53,19 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
     - Umożliwia zmiany pasa ruchu między krawędziami
 
 ### 4. Agenci
-- `AgentManager`: Koordynuje wszystkie agenty w symulacji
+- `AgentManager`: Koordynuje wszystkich agentów w symulacji
   - Wydajne wyszukiwanie pojazdów przez ID
-  - Tworzenie pojazdów przez wzorzec fabryki
   - Generowanie ruchu z konfigurowalnymi parametrami
-  - Zbieranie statystyk do analizy
 
-- `AgentGenerator`: Generuje agenty z określoną ścieżką w danym wierzchołku
+- `AgentGenerator`: Generuje agentów z określoną ścieżką w danym wierzchołku/miejscu
 
 - System Pojazdów:
   - `Agent`: Abstrakcyjna klasa bazowa dla wszystkich typów agentów
     - Pozycja, prędkość i wymiary fizyczne
-    - Możliwości podążania ścieżką
-    - Integracja z zachowaniem kierowcy
+    - Możliwości podążania wzdłuż ścieżki
   - Konkretne typy agentów:
     - `Vehicle`: Abstrakcyjna klasa bazowa dla wszystkich typów pojazdów
-        - `Car`: Standardowy samochód osobowy
+        - `Car`: Zwykły samochód osobowy
         - `Truck`: Większy pojazd o innych właściwościach fizycznych
   
 - System Zachowań:
@@ -77,7 +74,7 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
     - Decyzje dotyczące zmiany pasa i przyspieszenia
     - Symulacja czasu reakcji
   - `CollisionDetector`: Logika poruszania się po ścieżce
-    - Sprawdza, czy agent może bezpiecznie kontynuować na danej ścieżce, przestrzegając zasad ruchu drogowego
+    - Sprawdza, czy agent może bezpiecznie kontynuować na danej ścieżce, przestrzegając zasady ruchu drogowego
     - System podążania za pojazdem przed
     
 - System Ścieżek:
@@ -87,7 +84,7 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
 
 ## Możliwe Rozszerzenia
 
-- **System Skrzyżowań z obsługą sygnalizacji:**
+- **System skrzyżowań z obsługą sygnalizacji:**
   - `Intersection`: Definiuje skrzyżowanie kontrolowane przez sygnalizację świetlną
     - Zawiera węzły/wierzchołki wejściowe i wyjściowe
     - Integruje się z kontrolerami sygnalizacji świetlnej
@@ -97,25 +94,25 @@ Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co na
     - Utrzymuje stan świateł i czas
     - Określa uprawnienia do przejazdu pojazdów
 
-- **Interfejs Użytkownika i Obsługa Myszy/Klawiszy**
+- **Interfejs urzytkownika i obsługa myszy/klawiszy**
 
-- **Adaptacyjne Systemy Sygnalizacji Świetlnej**:
+- **Adaptacyjna sygnalizacja świetlna**:
   - Dostosowanie długości sygnału na podstawie informacji z symulowanych detektorów pętli indukcyjnych
 
-- **Dynamiczny Algorytm Znajdowania Ścieżki**:
+- **Algorytm pathfinding**:
 
-- **Symulacja Pieszych**:
+- **Symulacja pieszych**:
   - Agent `Pedestrian` z oddzielnymi zasadami zachowania od pojazdów
   - Przejścia dla pieszych i sygnalizacja dla pieszych
   - Interakcja z pojazdami
 
-- **Ruch Rowerowy**:
+- **Ruch rowerowy**:
   - Agent `Bicycle` z unikalnymi charakterystykami ruchu
 
-- **Zbieranie Statystyk**
+- **Zbieranie statystyk**
   - Gromadzenie i analizowanie danych symulacji
 
-- **Wizualizacja Danych**:
+- **Wizualizacja danych**:
   - Heatmapy natężenia ruchu
   - Diagramy przepływu ruchu
 
