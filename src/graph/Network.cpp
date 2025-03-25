@@ -127,78 +127,78 @@ int Network::addEdge(int sourceId, int destinationId)
     return edgeId;
 }
 
-std::vector<int> Network::addEdgeEx(int sourceId, int destinationId)
-{
-    Vertex* source{ m_vertices[sourceId].get() };
-    Vertex* destination{ m_vertices[destinationId].get() };
-
-    Vector2 newEdgeTangent{ normalizedTangent(source->pos(), destination->pos()) };
-
-    if (!source || !destination) return {};
-
-    struct EdgePositionPair
-    {
-        int edgeId{};
-        Vector2 pos{};
-        EdgePositionPair(int id, Vector2 position) : edgeId{ id }, pos{ position } {}
-    };
-
-    std::vector<EdgePositionPair> edgePositions{};
-    for (const auto& [eId, edge] : m_edges)
-    {
-        if (auto intersection{ lineIntersectCap(source->pos(), destination->pos(), edge->src()->pos(), edge->dest()->pos()) })
-        {
-            std::cout << "Found intersection at " << (*intersection).x << ", " << (*intersection).y << '\n';
-            edgePositions.push_back(EdgePositionPair(eId, *intersection));
-        }
-    }
-
-    std::sort(edgePositions.begin(), edgePositions.end(),
-        [source](const EdgePositionPair& a, const EdgePositionPair& b) {
-            return Vector2Distance(source->pos(), a.pos) < Vector2Distance(source->pos(), b.pos);
-        });
-
-    std::vector<int> addedEdges{};
-    if (edgePositions.empty())
-    {
-        addedEdges.push_back(addEdge(sourceId, destinationId));
-        std::cout << "edgePositions empty\n";
-        return addedEdges;
-    }
-
-    int lastJunction{ -1 };
-    for (auto& edgePos : edgePositions)
-    {
-        int edgeId{ edgePos.edgeId };
-        Vector2 intersectionPos{ edgePos.pos };
-
-        int altSource{ m_edges[edgeId]->src()->id() };
-        int altDestination{ m_edges[edgeId]->dest()->id() };
-
-        if (!removeEdge(edgeId)) return {};
-
-        int newJunction{ addJunction(intersectionPos) };
-
-        if (lastJunction == -1)
-        {
-            addedEdges.push_back(addEdge(sourceId, newJunction));
-        }
-        else
-        {
-            addedEdges.push_back(addEdge(lastJunction, newJunction));
-        }
-
-        addedEdges.push_back(addEdge(altSource, newJunction));
-        addedEdges.push_back(addEdge(newJunction, altDestination));
-
-        if (edgeId == edgePositions.back().edgeId)
-        {
-            addedEdges.push_back(addEdge(newJunction, destinationId));
-        }
-        lastJunction = newJunction;
-    }
-    return addedEdges;
-}
+//std::vector<int> Network::addEdgeEx(int sourceId, int destinationId)
+//{
+//    Vertex* source{ m_vertices[sourceId].get() };
+//    Vertex* destination{ m_vertices[destinationId].get() };
+//
+//    Vector2 newEdgeTangent{ normalizedTangent(source->pos(), destination->pos()) };
+//
+//    if (!source || !destination) return {};
+//
+//    struct EdgePositionPair
+//    {
+//        int edgeId{};
+//        Vector2 pos{};
+//        EdgePositionPair(int id, Vector2 position) : edgeId{ id }, pos{ position } {}
+//    };
+//
+//    std::vector<EdgePositionPair> edgePositions{};
+//    for (const auto& [eId, edge] : m_edges)
+//    {
+//        if (auto intersection{ lineIntersectCap(source->pos(), destination->pos(), edge->src()->pos(), edge->dest()->pos()) })
+//        {
+//            std::cout << "Found intersection at " << (*intersection).x << ", " << (*intersection).y << '\n';
+//            edgePositions.push_back(EdgePositionPair(eId, *intersection));
+//        }
+//    }
+//
+//    std::sort(edgePositions.begin(), edgePositions.end(),
+//        [source](const EdgePositionPair& a, const EdgePositionPair& b) {
+//            return Vector2Distance(source->pos(), a.pos) < Vector2Distance(source->pos(), b.pos);
+//        });
+//
+//    std::vector<int> addedEdges{};
+//    if (edgePositions.empty())
+//    {
+//        addedEdges.push_back(addEdge(sourceId, destinationId));
+//        std::cout << "edgePositions empty\n";
+//        return addedEdges;
+//    }
+//
+//    int lastJunction{ -1 };
+//    for (auto& edgePos : edgePositions)
+//    {
+//        int edgeId{ edgePos.edgeId };
+//        Vector2 intersectionPos{ edgePos.pos };
+//
+//        int altSource{ m_edges[edgeId]->src()->id() };
+//        int altDestination{ m_edges[edgeId]->dest()->id() };
+//
+//        if (!removeEdge(edgeId)) return {};
+//
+//        int newJunction{ addJunction(intersectionPos) };
+//
+//        if (lastJunction == -1)
+//        {
+//            addedEdges.push_back(addEdge(sourceId, newJunction));
+//        }
+//        else
+//        {
+//            addedEdges.push_back(addEdge(lastJunction, newJunction));
+//        }
+//
+//        addedEdges.push_back(addEdge(altSource, newJunction));
+//        addedEdges.push_back(addEdge(newJunction, altDestination));
+//
+//        if (edgeId == edgePositions.back().edgeId)
+//        {
+//            addedEdges.push_back(addEdge(newJunction, destinationId));
+//        }
+//        lastJunction = newJunction;
+//    }
+//    return addedEdges;
+//}
 
 //std::vector<Edge*> Network::addEdges(Node* srcNode, Node* destNode)
 //{
@@ -306,6 +306,76 @@ int Network::addNode(Vector2 position, int laneCount, Vector2 tangent)
     m_nodes[m_nextNodeId] = std::unique_ptr<Node>(node.release());
     std::cout << "Added vertex " << m_nextNodeId << '\n';
 	return m_nextNodeId++;
+}
+
+std::vector<int> Network::addConnection(Vertex* source, Vertex* destination)
+{
+    Vector2 newEdgeTangent{ normalizedTangent(source->pos(), destination->pos()) };
+
+    if (!source || !destination) return {};
+
+    struct EdgePositionPair
+    {
+        int edgeId{};
+        Vector2 pos{};
+        EdgePositionPair(int id, Vector2 position) : edgeId{ id }, pos{ position } {}
+    };
+
+    std::vector<EdgePositionPair> edgePositions{};
+    for (const auto& [eId, edge] : m_edges)
+    {
+        if (auto intersection{ lineIntersectCap(source->pos(), destination->pos(), edge->src()->pos(), edge->dest()->pos()) })
+        {
+            std::cout << "Found intersection at " << (*intersection).x << ", " << (*intersection).y << '\n';
+            edgePositions.push_back(EdgePositionPair(eId, *intersection));
+        }
+    }
+
+    std::sort(edgePositions.begin(), edgePositions.end(),
+        [source](const EdgePositionPair& a, const EdgePositionPair& b) {
+            return Vector2Distance(source->pos(), a.pos) < Vector2Distance(source->pos(), b.pos);
+        });
+
+    std::vector<int> addedEdges{};
+    if (edgePositions.empty())
+    {
+        addedEdges.push_back(addEdge(source->id(), destination->id()));
+        std::cout << "edgePositions empty\n";
+        return addedEdges;
+    }
+
+    int lastJunction{ -1 };
+    for (auto& edgePos : edgePositions)
+    {
+        int edgeId{ edgePos.edgeId };
+        Vector2 intersectionPos{ edgePos.pos };
+
+        int altSource{ m_edges[edgeId]->src()->id() };
+        int altDestination{ m_edges[edgeId]->dest()->id() };
+
+        if (!removeEdge(edgeId)) return {};
+
+        int newJunction{ addJunction(intersectionPos) };
+
+        if (lastJunction == -1)
+        {
+            addedEdges.push_back(addEdge(source->id(), newJunction));
+        }
+        else
+        {
+            addedEdges.push_back(addEdge(lastJunction, newJunction));
+        }
+
+        addedEdges.push_back(addEdge(altSource, newJunction));
+        addedEdges.push_back(addEdge(newJunction, altDestination));
+
+        if (edgeId == edgePositions.back().edgeId)
+        {
+            addedEdges.push_back(addEdge(newJunction, destination->id()));
+        }
+        lastJunction = newJunction;
+    }
+    return addedEdges;
 }
 
 //*
@@ -450,10 +520,10 @@ void Network::draw(bool debug)
         }
         if (debug)
         {
-            //for (auto& node : m_nodes)
-            //{
-            //    node->drawAxes();
-            //}
+            for (auto& node : m_nodes)
+            {
+                node->drawAxes();
+            }
         }
     }
 }

@@ -38,13 +38,10 @@ public:
 	//std::vector<Edge*> addEdges(Node* sources, Node* destinations);
 	//Edge* addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent); // adds a set of edges and vertices along a quadratic bezier curve, returns final edge
 	int addNode(Vector2 position, int laneCount, Vector2 tangent);
-	// std::vector<int> addConnection(int sourceId, int destinationId);
+	std::vector<int> addConnection(int sourceId, int destinationId);
+	std::vector<int> addConnection(int sourceId, int destinationId, std::optional<int> curveSubdivisions, std::optional<Vector2&> srcTangent, std::optional<Vector2&> destTangent);
 
-	std::vector<int> addConnection(Vertex* source, Vertex* destination);	// straight connection between two existing vertices taking into account possible intersections with other edges
-	std::vector<int> addConnection(Vertex* source, Vertex* destination, Vector2& inTangent, Vector2& outTangent, std::optional<int> curveSubdivisions);	// curved connection between two vertices, made up from multiple edges and vertices
-	std::vector<int> addConnection(Node* source, Node* destination, std::optional<int> curveSubdivisions); // connection between two nodes, possibly curved if tangents misallign
-
-	
+	bool removeEdge(int edgeId);
 
 	void draw(bool debug);
 	//auto nodes() const;
@@ -55,7 +52,6 @@ public:
 private:
 	void drawArrow(Vector2& start, Vector2& end, float lineWidth, Color color);
 	int checkForEdge(Vertex* source, Vertex* destination);
-	bool removeEdge(int edgeId);
 	int convertToJunction(int waypointId);
 	int convertToWaypoint(int junctionId);
 };

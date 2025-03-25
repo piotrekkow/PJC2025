@@ -14,3 +14,4 @@ constexpr Color ROAD_COLOR{ LIGHTGRAY };
 constexpr float VERTEX_RADIUS{ 5.0f };
 constexpr float LANE_WIDTH{ 20.0f };
 constexpr float DEBUG_AXES_LENGTH{ 20.0f };
+constexpr auto WINDOW_TITLE{ "PJC2025" };

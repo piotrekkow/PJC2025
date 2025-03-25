@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)src;$(ProjectDir)src\network;$(ProjectDir)src\utils;$(ProjectDir)src\graph;$(ProjectDir)src\vehicles;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)src\network;$(ProjectDir)src\utils;$(ProjectDir)src\graph;$(ProjectDir)src\vehicles;$(ProjectDir)src\simulation;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -137,7 +137,7 @@
     <ClCompile Include="src\utils\QuadBezier.cpp" />
     <ClCompile Include="src\graph\Segment.cpp" />
     <ClCompile Include="src\vehicles\Path.cpp" />
-    <ClCompile Include="src\vehicles\Simulation.cpp" />
+    <ClCompile Include="src\simulation\Simulation.cpp" />
     <ClCompile Include="src\graph\Network.cpp" />
     <ClCompile Include="src\graph\Node.cpp" />
     <ClCompile Include="src\utils\Angle.cpp" />
@@ -154,7 +154,7 @@
     <ClInclude Include="src\utils\QuadBezier.h" />
     <ClInclude Include="src\graph\Segment.h" />
     <ClInclude Include="src\vehicles\Path.h" />
-    <ClInclude Include="src\vehicles\Simulation.h" />
+    <ClInclude Include="src\simulation\Simulation.h" />
     <ClInclude Include="src\graph\Network.h" />
     <ClInclude Include="src\graph\Node.h" />
     <ClInclude Include="src\utils\Angle.h" />
@@ -172,6 +172,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="classdiagram.md">
+      <SubType>
+      </SubType>
+    </None>
+    <None Include="README.md">
+      <SubType>
+      </SubType>
+    </None>
+    <None Include="note.md">
       <SubType>
       </SubType>
     </None>
