@@ -1,123 +1,67 @@
-# Symulacja Ruchu Drogowego
+# Symulacja ruchu drogowego
+Przedmiotem mojego projektu jest stworzenie mikro-symulacji ruchu drogowego. Zakresem symulacji jest realistyczne przestawienie ruchu na małym obszarze (maksymalnie kilka skrzyżowań w jednej sytuacji). 
 
-Projekt implementuje mikro-symulację ruchu drogowego skupiającą się na co najwyżej kilku skrzyżowaniach jednocześnie. Docelowo ma dosyć realistycznie odwzorowywać ruch - inspiracją jest PTV Vissim.
+## Założenia techniczne:
+- Środowisko: Visual Studio (MSVC)  
+- Repozytorium: Github  
+- UI, grafika: Raylib  
 
-## Założenia Techniczne
-- Język: C++
-- Grafika: raylib, 2D
-- Paradygmat: Programowanie obiektowe
-- Środowisko programowania: MSVC
-- Repozytorium: Github
-- Dodatki: CMake oraz pliki w .vscode, .devcontainer pozwalają kompilować kod na Github Codespaces (pracę zdalną na tablecie)
+## Dostępne czynności
+Funkcjonalności:
+- Sterowanie prędkością oraz zatrzymania symulacji
+- Zmiana wybranych parametrów symulacji przez użytkownika
+- Honorowanie pierwszeństwa zgodnie z zasadami ruchu drogowego,  
+- Różny czas reakcji, przyspieszenie, zachowanie kierowców/agentów,   
+- Generowanie agentów w wyznaczonym przez użytkownika charakterze w danym miejscu / na danym wlocie skrzyżowania,  
+- Wyszukiwanie optymalnej ścieżki do celu przez agenta,  
+    - Możliwość zmiany pasów/ścieżki w celu ominięcia zatoru,  
+- Automatyczne rysowanie w miarę sensownych oznaczeń poziomych na drodze - np. linia warunkowego zatrzymania, linia przerywana,
 
-## Główne składowe projektu
+.
+- Wgranie predefiniowanego skrzyżowania 
+- Celem optymalizacji obsługa wszystkich `Vertex` i `Node` przez quadtree,
+- Ruch pieszych oraz rowerzystów,
+- Kompleksowa sygnalizacja świetlna wraz z:
+    - Programami sygnalizacji świetlnej z możliwością ich regulacji,
+    - Automatyczne wyliczanie czasów międzyzielonych potrzebne do zapewnienia bezpiecznej pracy sygnalizacji świetlnej
+    - Algorytmy sygnalizacji świetlnej i detektory pojazdów. 
+- Pojazdy komunikacji miejskiej (tramwaj, autobus) przewożące pasażerów (generujące agentów typu pieszy na wyznaczonym przystanku, którzy korzystają ze skrzyżowania)
+- Wizualizacja danych, statystyki, diagramy przepływu ruchu
 
-### 1. Struktura Symulacji
-- `Simulation`: Centralny koordynator integrujący wszystkie systemy
-  - Zarządza czasem symulacji
-  - Obsługuje funkcjonalność pauzy/wznowienia
-  - Koordynuje aktualizacje we wszystkich podsystemach
-- `Config`: Konfiguracja zawierająca parametry symulacji
-  - Wymiary okna, nazwa symulacji, zmienne używane globalnie
-- `Renderer`: System renderowania poszczególnych obiektów wykorzystujący raylib
+## UI
 
-### 2. Zarządzanie ID
-- `EntityId`: Klasa łącząca typ encji zdefiniowany w EnitityType i numer id
-  - Silne typowanie dla bezpieczeństwa typów w czasie kompilacji
-  - Wydajne operacje porównawcze
-  - Reprezentacja stringowa do debugowania
-- `EntityType`: Klasa enum definiująca wszystkie kategorie encji
-  - Elementy infrastruktury (VERTEX, EDGE, NODE, itp.)
-  - Agenci (VEHICLE, PEDESTRIAN, itp.)
-- `IdGenerator`: Generowanie ID
-  - Zarządzanie licznikami dla każdego typu encji
-- `Entity`: Abstrakcyjna klasa bazowa dla wszystkich identyfikowalnych obiektów
-  - Automatyczne przypisanie ID przez konstruktor
-  - Możliwości sprawdzenia typu
+![UI](./resources/IMG_0272.jpeg)
 
-### 3. Infrastruktura (Sieć oparta na grafie)
-- `TrafficNetwork`: Menedżer dla wszystkich komponentów infrastruktury
-  - Wyszukiwanie encji przez ID
-  - Dodawanie, usuwanie encji infrastruktury
+## Struktura programu
 
-- System wierzchołków:
-  - `Vertex`: Reprezentuje wierzchołek, punkt w sieci z danymi pozycji
-    - `Waypoint`: Maks. 1 krawędź wchodząca i wychodząca
-    - `Junction`: Wiele krawędzi wchodzących lub wychodzących
-  - `Edge`: Krawędź, łączy wierzchołki i reprezentuje pas ruchu
-    - Połączenie kierunkowe
+Symulacja składa się z dwóch głównych części:
+- Obsługa infrastruktury 
+- Obsługa agentów (uczestników ruchu drogowego)  
 
-- System węzłów:
-  - `Node`: Węzęł, grupa wierzchołków w z ustaloną pozycją odniesienia
-    - Funkcjonuje jako punkty decyzyjne dla trasowania
-    - Może istnieć na wlotach/wylotach skrzyżowań
-  - `Segment`: Połączenie między dwoma węzłami (Node)
-    - Umożliwia zmiany pasa ruchu między krawędziami
+Dodatkowo od logiki zostanie oddzielona obsługa wejść (klawiszy, myszy).
 
-### 4. Agenci
-- `AgentManager`: Koordynuje wszystkich agentów w symulacji
-  - Wydajne wyszukiwanie pojazdów przez ID
-  - Generowanie ruchu z konfigurowalnymi parametrami
+### Obsługa infrastruktury:
+Droga, po której będą poruszać się agenci będzie reprezentowana jako graf, który składa się z krawędzi i wierzchołków. W celu dostatecznie kompleksowej obsługi agentów graf, dzielę na dwa poziomy:
 
-- `AgentGenerator`: Generuje agentów z określoną ścieżką w danym wierzchołku/miejscu. 
-  
-- `Agent`: Abstrakcyjna klasa bazowa dla wszystkich typów agentów
-  - Pozycja, prędkość i wymiary fizyczne
-  - Możliwości podążania wzdłuż ścieżki
-- Konkretne typy agentów - Pojazdy:
-  - `Vehicle`: Abstrakcyjna klasa bazowa dla wszystkich typów pojazdów
-    - `Car`: Zwykły samochód osobowy
-    - `Truck`: Większy pojazd o innych właściwościach fizycznych
-  
-- System Zachowań:
-  - `DriverBehavior`: Enkapsuluje logikę decyzji kierowcy
-    - Konfigurowalna agresywność i przestrzeganie zasad
-    - Decyzje dotyczące zmiany pasa i przyspieszenia
-    - Symulacja czasu reakcji
-  - `CollisionDetector`: Logika poruszania się po ścieżce
-    - Sprawdza, czy agent może bezpiecznie kontynuować na danej ścieżce, przestrzegając zasady ruchu drogowego
-    - System podążania za pojazdem przed
-    
-- System Ścieżek:
-  - `Path`: Reprezentuje zaplanowane trasy dla pojazdów
-    - Sekwencja węzłów i segmentów (lub wierzchołków i krawędzi)
-    - Śledzenie postępu i obliczanie pozostałej odległości
+**Na niskim poziomie graf będzie składał się z wierzchołków `Vertex` i krawędzi `Edge`.**
+- Pojedyńczy `Vertex` przedstawia punkt w przestrzeni 2D,
+- Każdy `Edge` reprezentuje połączenie między dwoma `Vertex` w linii prostej,
+- Tworząc nowy `Edge`, który przecinałby już istniejący `Edge` dzielimy, przecinające się `Edge`, a w ich punkcie przecięcia dodajemy `Vertex`,
+- Celem udogodnień w obsłudze wyszukiwania ścieżki, sprawdzania kolizji / pierwszeństwa w głąb grafu `Vertex` może być:
+    - typu `Waypoint`: max 1 `Edge` wchodzący i max 1 `Edge` wychodzący,
+    - typu `Junction`: >1 `Edge` wchodzący lub >1 `Edge` wychodzący.
 
-## Możliwe Rozszerzenia
+**Na wysokim poziomie będzie się składać z wierzchołków `Node` i krawędzi `Segment`**:
 
-- **System skrzyżowań z obsługą sygnalizacji:**
-  - `Intersection`: Definiuje skrzyżowanie kontrolowane przez sygnalizację świetlną
-    - Zawiera węzły/wierzchołki wejściowe i wyjściowe
-    - Integruje się z kontrolerami sygnalizacji świetlnej
-  - `TrafficLightController`: Koordynuje światła na skrzyżowaniu
-    - Zarządza czasem sygnalizacji i cyklami
-  - `TrafficLight`: Kontroluje określone węzły/krawędzie
-    - Utrzymuje stan świateł i czas
-    - Określa uprawnienia do przejazdu pojazdów
+- `Node` to zbiór `Vertex` z pewnym punktem odniesienia oraz z kierunkiem,
+- `Link` to zbiór `Edge` łączących `Node`.  
 
-- **Interfejs urzytkownika i obsługa myszy/klawiszy**
+`Link` dzielę na 2 przypadki:
+   - Łączy 2 `Node` to jest segmentem typu `Segment`,    
+   - Łączy >2 `Node` to jest segmentem typu `Intersection`.  
 
-- **Adaptacyjna sygnalizacja świetlna**:
-  - Dostosowanie długości sygnału na podstawie informacji z symulowanych detektorów pętli indukcyjnych
+![Network](./resources/IMG_0271.jpeg)
 
-- **Algorytm pathfinding**:
-
-- **Symulacja pieszych**:
-  - Agent `Pedestrian` z oddzielnymi zasadami zachowania od pojazdów
-  - Przejścia dla pieszych i sygnalizacja dla pieszych
-  - Interakcja z pojazdami
-
-- **Ruch rowerowy**:
-  - Agent `Bicycle` z unikalnymi charakterystykami ruchu
-
-- **Zbieranie statystyk**
-  - Gromadzenie i analizowanie danych symulacji
-
-- **Wizualizacja danych**:
-  - Heatmapy natężenia ruchu
-  - Diagramy przepływu ruchu
-
-## Odnośniki
-- PTV Vissim
-- Cubic Synchro Studio
-- Dz.U. 2019 poz. 2311
+### Obsługa agentów:
+Agenci są generowani w wyznaczonym miejscu z daną częstotliwością i losowością. Agenci mają docelowy `Node` do którego zmierzają. 
+Agenci dzielą się na `Vehicle`, `Pedestrian`, `Cyclist`. `Vehicle` dalej dzielą się na `Car`, `MassTransit`, a `MassTransit` na `Bus` i `Tram`. Pojazdy celem trzymania się zasad ruchu drogowego wykorzystują graf przeszukując możliwe kolizje w nadchodzących `Junction` z innymi pojazdami, które nie mają pierwszeństwa.
