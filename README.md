@@ -30,7 +30,7 @@ Funkcjonalności:
 
 ## UI
 
-![UI](./resources/IMG_0272.jpeg)
+![UI](./resources/IMG_0272.JPEG)
 
 ## Struktura programu
 
@@ -60,7 +60,7 @@ Droga, po której będą poruszać się agenci będzie reprezentowana jako graf,
    - Łączy 2 `Node` to jest segmentem typu `Segment`,    
    - Łączy >2 `Node` to jest segmentem typu `Intersection`.  
 
-![Network](./resources/IMG_0271.jpeg)
+![Network](./resources/IMG_0271.JPEG)
 
 ### Obsługa agentów:
 Agenci są generowani w wyznaczonym miejscu z daną częstotliwością i losowością. Agenci mają docelowy `Node` do którego zmierzają. 
