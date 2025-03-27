@@ -64,4 +64,4 @@ Droga, po której będą poruszać się agenci będzie reprezentowana jako graf,
 
 ### Obsługa agentów:
 Agenci są generowani w wyznaczonym miejscu z daną częstotliwością i losowością. Agenci mają docelowy `Node` do którego zmierzają. 
-Agenci dzielą się na `Vehicle`, `Pedestrian`, `Cyclist`. `Vehicle` dalej dzielą się na `Car`, `MassTransit`, a `MassTransit` na `Bus` i `Tram`. Pojazdy celem trzymania się zasad ruchu drogowego wykorzystują graf przeszukując możliwe kolizje w nadchodzących `Junction` z innymi pojazdami, które nie mają pierwszeństwa.
+Agenci dzielą się na `Vehicle`, `Pedestrian`, `Cyclist`. `Vehicle` dalej dzielą się na `Car`, `MassTransit`, a `MassTransit` na `Bus` i `Tram`. Pojazdy celem trzymania się zasad ruchu drogowego wykorzystują graf przeszukując możliwe kolizje w nadchodzących `Junction` z innymi pojazdami, które mają pierwszeństwo.  
