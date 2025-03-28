@@ -51,10 +51,10 @@ Droga, po której będą poruszać się agenci będzie reprezentowana jako graf,
     - typu `Waypoint`: max 1 `Edge` wchodzący i max 1 `Edge` wychodzący,
     - typu `Junction`: >1 `Edge` wchodzący lub >1 `Edge` wychodzący.
 
-**Na wysokim poziomie będzie się składać z wierzchołków `Node` i krawędzi `Segment`**:
+**Na wysokim poziomie będzie się składać z wierzchołków `Node` i krawędzi `Link`**:
 
 - `Node` to zbiór `Vertex` z pewnym punktem odniesienia oraz z kierunkiem,
-- `Link` to zbiór `Edge` łączących `Node`.  
+- `Link` to zbiór `Edge` (oraz opcjonalnie `Vertex` np. na zakręcie lub skrzyżowaniu) łączących `Node`.  
 
 `Link` dzielę na 2 przypadki:
    - Łączy 2 `Node` to jest segmentem typu `Segment`,    
