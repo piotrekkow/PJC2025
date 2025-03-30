@@ -1,6 +1,7 @@
 #include <cmath> // sqrt
 #include <algorithm> // max
 #include "utils.h"
+#include "config.h"
 
 Vector2 operator+(const Vector2& v1, const Vector2& v2)
 {
@@ -43,19 +44,19 @@ Vector2& operator-=(Vector2& v1, const Vector2& v2)
     return v1;
 }
 
-float Vector2Length(const Vector2& v)
+float vector2Length(const Vector2& v)
 {
     return std::sqrt(v.x * v.x + v.y * v.y);
 }
 
-float Vector2Distance(const Vector2& v1, const Vector2& v2)
+float vector2Distance(const Vector2& v1, const Vector2& v2)
 {
     return std::sqrt((v2.x-v1.x) * (v2.x - v1.x) + (v2.y - v1.y) * (v2.y - v1.y));
 }
 
-Vector2 Vector2Normalize(const Vector2& v)
+Vector2 vector2Normalize(const Vector2& v)
 {
-    float length = Vector2Length(v);
+    float length = vector2Length(v);
     if (length != 0.0f)
         return { v.x / length, v.y / length };
     return v;
@@ -86,7 +87,7 @@ bool operator!=(const Vector2& v1, const Vector2& v2)
 
 Vector2 normalizedTangent(const Vector2& v1, const Vector2 v2)
 {
-    return Vector2Normalize(v2 - v1);
+    return vector2Normalize(v2 - v1);
 }
 
 Vector2 operator-(const Vector2& v)
@@ -149,4 +150,34 @@ bool isCollinear(const Vector2& pos1, const Vector2& tan1, const Vector2& pos2, 
 	float dot1{ dotProduct(normTangent, tan1) };
 	float dot2{ dotProduct(normTangent, tan2) };
 	return dot1 > allignmentThreshold && dot2 > allignmentThreshold;
+}
+
+
+// temporarily here, later to be put in Renderer
+void drawArrow(Vector2& start, Vector2& end, float lineWidth, Color color)
+{
+    DrawLineEx(start, end, lineWidth, color);
+
+    Vector2 direction = vector2Normalize(end - start);
+
+    float arrowSize = 10.0f;
+    float arrowAngle = 30.0f * DEG2RAD;
+
+    Vector2 leftWing = {
+        direction.x * cosf(arrowAngle) - direction.y * sinf(arrowAngle),
+        direction.x * sinf(arrowAngle) + direction.y * cosf(arrowAngle)
+    };
+
+    Vector2 rightWing = {
+        direction.x * cosf(-arrowAngle) - direction.y * sinf(-arrowAngle),
+        direction.x * sinf(-arrowAngle) + direction.y * cosf(-arrowAngle)
+    };
+
+    leftWing = -arrowSize * leftWing;
+    rightWing = -arrowSize * rightWing;
+
+    Vector2 arrowBase = end - direction * VERTEX_RADIUS;
+
+    DrawLineEx(arrowBase, arrowBase + leftWing, lineWidth, color);
+    DrawLineEx(arrowBase, arrowBase + rightWing, lineWidth, color);
 }

@@ -1,44 +1,91 @@
 #include "Node.h"
+#include "utils.h"
+#include "config.h"
+#include "Waypoint.h"
+// #include "Junction.h"
+#include <stdexcept>
 
-Vector2 Node::tangent() const
+Node::Node(Vector2 position, Vector2 tangent, int laneCount)
+	: m_position{ position }
+	, m_tangent{ vector2Normalize(tangent) }
 {
-	return m_tangent;
+	fillNode(laneCount);
 }
 
-int Node::size() const
-{
-	return m_laneCount;
-}
 
-Vector2 Node::normal() { return { -m_tangent.y, m_tangent.x }; }
-
-void Node::fillNode()
-{
-	Vector2 step{ normal() * LANE_WIDTH };
-	Vector2 cursor{ m_position - step * static_cast<float>(m_laneCount - 1) / 2 };
-	for (int i = 0; i < m_laneCount; ++i)
-	{
-		m_network.addWaypoint(cursor);
-		cursor += step;
-	}
-}
-
-Node::Node(Network& network, Vector2 position, int laneCount, Vector2 tangent)
-	: m_network{ network }
-	, m_position{ position }
-	, m_tangent{ Vector2Normalize(tangent) }
-	, m_laneCount{ laneCount }
-{
-	fillNode();
-}
-
-Vector2 Node::pos() const
+Vector2 Node::getPos() const
 {
 	return m_position;
 }
 
-void Node::drawAxes()
+Vector2 Node::getTangent() const
 {
-	DrawLineV(m_position, m_position + m_tangent * DEBUG_AXES_LENGTH, TANGENT_COLOR);
-	DrawLineV(m_position, m_position + normal() * DEBUG_AXES_LENGTH, NORMAL_COLOR);
+	return m_tangent;
 }
+
+size_t Node::getSize() const
+{
+	return m_vertices.size();
+}
+
+std::vector<Vertex*> Node::getVertices() const
+{
+	std::vector<Vertex*> vertices{};
+	for (auto& vertex : m_vertices)
+	{
+		vertices.emplace_back(vertex.get());
+	}
+	return vertices;
+}
+
+Segment* Node::getOut() const
+{
+	return m_out.get();
+}
+
+Segment* Node::getIn() const
+{
+	return m_in;
+}
+
+Segment* Node::addOutSegment(Node* destination)
+{
+	if (!isCollinear(m_position, m_tangent, destination->getPos(), destination->getTangent())) throw std::logic_error("Nodes must be collinear to be viably connected by a Segment");
+
+	m_out = std::make_unique<Segment>(this, destination);
+	return m_out.get();
+}
+
+void Node::setInSegment(Segment* inSegment)
+{
+	m_in = inSegment;
+}
+
+Vector2 Node::normal()
+{
+	return { -m_tangent.y, m_tangent.x };
+}
+
+std::vector<Vertex*> Node::fillNode(int size)
+{
+	std::vector<Vertex*> vertices{};
+
+	Vector2 step{ normal() * LANE_WIDTH };
+	Vector2 cursor{ m_position - step * static_cast<float>(size - 1) / 2 };
+	for (int i = 0; i < size; ++i)
+	{
+		auto vertex{ addVertex<Waypoint>(cursor) };
+		vertices.emplace_back(vertex);
+		cursor += step;
+	}
+	return vertices;
+}
+
+
+
+
+//void Node::drawAxes()
+//{
+//	DrawLineV(m_position, m_position + m_tangent * DEBUG_AXES_LENGTH, TANGENT_COLOR);
+//	DrawLineV(m_position, m_position + normal() * DEBUG_AXES_LENGTH, NORMAL_COLOR);
+//}

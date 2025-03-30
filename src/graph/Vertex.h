@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <raylib.h>
 #include "Edge.h"
@@ -10,14 +11,12 @@ class Vertex
 {
 protected:
 	Vector2 m_position;
-	const int m_id;
 
 public:
-	Vertex(int id, Vector2 position);
+	Vertex(Vector2 position);
 	virtual ~Vertex() = default;
 
-	Vector2& pos();
-	const int id() const;
+	Vector2& getPos();
 
 	virtual bool canAddIn() = 0;
 	virtual bool canAddOut() = 0;

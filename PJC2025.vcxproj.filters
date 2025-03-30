@@ -36,16 +36,19 @@
     <ClCompile Include="src\graph\Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\Vehicle.cpp">
+    <ClCompile Include="src\graph\Junction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\Simulation.cpp">
+    <ClCompile Include="src\utils\QuadBezier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\Path.cpp">
+    <ClCompile Include="src\graph\Segment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\VehicleGenerator.cpp">
+    <ClCompile Include="src\simulation\Simulation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\Waypoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,16 +77,19 @@
     <ClInclude Include="src\graph\Network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\Vehicle.h">
+    <ClInclude Include="src\graph\Junction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\Simulation.h">
+    <ClInclude Include="src\utils\QuadBezier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\Path.h">
+    <ClInclude Include="src\graph\Segment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\VehicleGenerator.h">
+    <ClInclude Include="src\simulation\Simulation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\Waypoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -95,5 +101,7 @@
   <ItemGroup>
     <None Include="vcpkg.json" />
     <None Include="classdiagram.md" />
+    <None Include="README.md" />
+    <None Include="note.md" />
   </ItemGroup>
 </Project>

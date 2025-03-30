@@ -1,6 +1,6 @@
 #include "Junction.h"
 
-Junction::Junction(int id, Vector2 position) : Vertex(id, position) {}
+Junction::Junction(Vector2 position) : Vertex(position) {}
 
 std::vector<Edge*> Junction::in() const
 {

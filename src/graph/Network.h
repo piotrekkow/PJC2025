@@ -1,58 +1,59 @@
 #pragma once
-#include <memory>
-#include <unordered_map>
-#include <iostream>
-#include "Vertex.h"
 #include "Node.h"
-#include "VehicleGenerator.h"
-#include "Vehicle.h"
-#include "Waypoint.h"
-#include "Junction.h"
 
 class Node;
-class Vehicle;
 
 class Network
 {
-	std::unordered_map<int, std::shared_ptr<Edge>> m_edges;
-	std::unordered_map<int, std::unique_ptr<Vertex>> m_vertices;
-	std::unordered_map<int, std::unique_ptr<Node>> m_nodes;
+	/** We can only store the nodes in the network because each node owns the underyling Segments, Vertices and Edges */
+	std::vector<std::unique_ptr<Node>> m_nodes;
 
-	std::unordered_map<Edge*, std::vector<Vehicle*>> m_edgeVehicleMap;
-	int m_nextVertId{ 0 }, m_nextEdgeId{ 0 }, m_nextNodeId{ 0 };
-
-	template<typename VertexType, typename... Args>
-	int createVertex(Args&&... args)
-	{
-		auto vertex = std::make_unique<VertexType>(m_nextVertId, std::forward<Args>(args)...);
-		m_vertices[m_nextVertId] = std::unique_ptr<Vertex>(vertex.release());
-		std::cout << "Added vertex " << m_nextVertId << '\n';
-		return m_nextVertId++;
-	}
+	/** Intersections are stored separately because they represent much more complex connections between nodes when compared to Segments */
+	// std::vector<std::unique_ptr<Intersection>> m_intersections;
 
 public:
-	int addWaypoint(Vector2 position);
-	int addJunction(Vector2 position);
-	int addEdge(int sourceId, int destinationId); // edge between two existing vertices
-	std::vector<int> addEdgeEx(int sourceId, int destinationId); // edge between two existing vertices checking for and adding junctions when crossing existing edges
-	//std::vector<Edge*> addEdges(Node* sources, Node* destinations);
-	//Edge* addEdge(Vertex* source, Vertex* destination, int curveSubdiv, Vector2 inTangent, Vector2 outTangent); // adds a set of edges and vertices along a quadratic bezier curve, returns final edge
-	int addNode(Vector2 position, int laneCount, Vector2 tangent);
-	std::vector<int> addConnection(int sourceId, int destinationId);
-	std::vector<int> addConnection(int sourceId, int destinationId, std::optional<int> curveSubdivisions, std::optional<Vector2&> srcTangent, std::optional<Vector2&> destTangent);
+	/**
+	 * @brief Adds a node independent of all other nodes in the network
+	 * @param position Position of the node
+	 * @param tangent Tangent of the node, eg the direction it's facing: useful for node connection logic (curved segments, are nodes colinnear, etc)
+	 * @param size Number of lanes (vertices in a node)
+	 * @return Newly created node
+	 */
+	Node* addNode(Vector2 position, Vector2 tangent, int size);
 
-	bool removeEdge(int edgeId);
+	/**
+	 * @brief Adds a node/s and segment/s connecting to that node
+	 * If the two nodes representing the beginning and the end of the road are not collinear more nodes and segments may be created to create a curved road 
+	 * @param previousNode Pointer to node from which the segment/s to the new node will be created
+	 * @param position Position of the node
+	 * @param tangent Tangent of the node, eg the direction it's facing: useful for node connection logic (curved segments, are nodes colinnear, etc)
+	 * @param size Number of lanes (vertices in a node)
+	 * @return All nodes comprising the new road
+	 */
+	// std::vector<Node*> addRoad(Node* previousNode, Vector2 position, Vector2 tangent, int size);
 
+	/**
+	 * @brief Adds a segment connecting two nodes 
+	 * @param source Pointer to node from which the segment/s will be created
+	 * @param destination Pointer to node to which the segment/s will be created
+	 * @return All nodes comprising the new road
+	 */
+	// std::vector<Node*> addRoad(Node* source, Node* destination);
+
+	/**
+	 * @brief Adds a node/s and segment/s connecting to that node
+	 * If the two nodes representing the beginning and the end of the road are not collinear more nodes and segments may be created to create a curved road
+	 * @param nextNode Pointer to node to which the segment/s from the new node will be created
+	 * @param position Position of the node
+	 * @param tangent Tangent of the node, eg the direction it's facing: useful for node connection logic (curved segments, are nodes colinnear, etc)
+	 * @param size Number of lanes (vertices in a node)
+	 * @return All nodes comprising the new road
+	 */
+	// std::vector<Node*> addRoad(Vector2 position, Vector2 tangent, int size, Node* nextNode);
+
+	// Intersection* addIntersection(std::vector<Node*> inlets, std::vector<Node*> outlets, 
 	void draw(bool debug);
-	//auto nodes() const;
-	
-	//void registerVehicle(Vehicle* vehicle);
-	//void unregisterVehicle(Vehicle* vehicle);
-
 private:
-	void drawArrow(Vector2& start, Vector2& end, float lineWidth, Color color);
-	int checkForEdge(Vertex* source, Vertex* destination);
-	int convertToJunction(int waypointId);
-	int convertToWaypoint(int junctionId);
+
 };
 

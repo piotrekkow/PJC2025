@@ -2,17 +2,20 @@
 #include <utility>
 #include "Network.h"
 
+class Node;
+
 class Segment
 {
-//	Node* m_nodeA;
-//	Node* m_nodeB;
-//	Network& m_network;
-//
-//public:
-//	Segment(Network& network, Vector2 nodeA, Vector2 nodeB, int laneCount);
-//	// Segment(Node* nodeA, Node* nodeB, Vector2 ctrlPointB, Vector2 controlPointB);
-//	// void fillSegment(int subdivisions);
-//
-//private:
+	std::vector<std::unique_ptr<Edge>> m_edges;
+	Node* m_source;
+	Node* m_destination;
+
+public:
+	Segment(Node* source, Node* destiantion);
+	std::vector<Edge*> getEdges() const;
+	Node* getSource() const;
+	Node* getDestination() const;
 	
+private:
+	Edge* addEdge(Vertex* source, Vertex* destination);
 };

@@ -7,17 +7,15 @@ Przedmiotem mojego projektu jest stworzenie mikro-symulacji ruchu drogowego. Zak
 - UI, grafika: Raylib  
 
 ## Dostępne czynności
-Funkcjonalności:
-- Sterowanie prędkością oraz zatrzymania symulacji
-- Zmiana wybranych parametrów symulacji przez użytkownika
+Funkcje:
+- Sterowanie prędkością symulacji oraz obsługa zatrzymania symulacji,
+- Zmiana wybranych parametrów symulacji przez użytkownika,
 - Honorowanie pierwszeństwa zgodnie z zasadami ruchu drogowego,  
 - Różny czas reakcji, przyspieszenie, zachowanie kierowców/agentów,   
 - Generowanie agentów w wyznaczonym przez użytkownika charakterze w danym miejscu / na danym wlocie skrzyżowania,  
 - Wyszukiwanie optymalnej ścieżki do celu przez agenta,  
     - Możliwość zmiany pasów/ścieżki w celu ominięcia zatoru,  
 - Automatyczne rysowanie w miarę sensownych oznaczeń poziomych na drodze - np. linia warunkowego zatrzymania, linia przerywana,
-
-.
 - Wgranie predefiniowanego skrzyżowania 
 - Celem optymalizacji obsługa wszystkich `Vertex` i `Node` przez quadtree,
 - Ruch pieszych oraz rowerzystów,

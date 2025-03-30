@@ -7,7 +7,7 @@ class Waypoint :
     Edge* m_out{ nullptr };
 
 public:
-	Waypoint(int id, Vector2 position);
+	Waypoint(Vector2 position);
     Edge* in() const;
     Edge* out() const;
     bool canAddIn() override;

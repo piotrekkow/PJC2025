@@ -136,7 +136,6 @@
     <ClCompile Include="src\graph\Junction.cpp" />
     <ClCompile Include="src\utils\QuadBezier.cpp" />
     <ClCompile Include="src\graph\Segment.cpp" />
-    <ClCompile Include="src\vehicles\Path.cpp" />
     <ClCompile Include="src\simulation\Simulation.cpp" />
     <ClCompile Include="src\graph\Network.cpp" />
     <ClCompile Include="src\graph\Node.cpp" />
@@ -145,15 +144,12 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\utils\utils.cpp" />
     <ClCompile Include="src\graph\Vertex.cpp" />
-    <ClCompile Include="src\vehicles\Vehicle.cpp" />
-    <ClCompile Include="src\vehicles\VehicleGenerator.cpp" />
     <ClCompile Include="src\graph\Waypoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graph\Junction.h" />
     <ClInclude Include="src\utils\QuadBezier.h" />
     <ClInclude Include="src\graph\Segment.h" />
-    <ClInclude Include="src\vehicles\Path.h" />
     <ClInclude Include="src\simulation\Simulation.h" />
     <ClInclude Include="src\graph\Network.h" />
     <ClInclude Include="src\graph\Node.h" />
@@ -163,8 +159,6 @@
     <ClInclude Include="src\utils\config.h" />
     <ClInclude Include="src\utils\utils.h" />
     <ClInclude Include="src\graph\Vertex.h" />
-    <ClInclude Include="src\vehicles\Vehicle.h" />
-    <ClInclude Include="src\vehicles\VehicleGenerator.h" />
     <ClInclude Include="src\graph\Waypoint.h" />
   </ItemGroup>
   <ItemGroup>

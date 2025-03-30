@@ -1,46 +1,17 @@
 #include "Edge.h"
-#include "utils.h"
+#include "utils.h" //vector2Distance()
+#include "config.h" //EDGE_COLOR
 
-
-Edge::Edge(int id, Vertex* source, Vertex* destination)
-	: m_id{ id }
-	, m_source { source }
+Edge::Edge(Vertex* source, Vertex* destination)
+	: m_source{ source }
 	, m_destination{ destination }
+	, m_length{ vector2Distance(m_source->getPos(), m_destination->getPos()) }
 {
-	m_length = length();
+	m_source->addOut(this);
+	m_destination->addIn(this);
 }
 
-const float Edge::length() const
+void Edge::draw()
 {
-	return Vector2Distance(m_source->pos(), m_destination->pos());
-}
-
-Vertex* Edge::dest() const
-{
-	return m_destination;
-}
-
-Vertex* Edge::src() const
-{
-	return m_source;
-}
-
-const Vector2 Edge::tangent() const
-{
-	return normalizedTangent(m_source->pos(), m_destination->pos());
-}
-
-void Edge::updateSource(Vertex* newSource)
-{
-	m_source = newSource;
-}
-
-void Edge::updateDestination(Vertex* newDestination)
-{
-	m_destination = newDestination;
-}
-
-const int Edge::id() const
-{
-	return m_id;
+	DrawLineV(m_source->getPos(), m_destination->getPos(), EDGE_COLOR);
 }
