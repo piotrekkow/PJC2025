@@ -38,6 +38,14 @@ const std::vector<Vector2>& QuadBezier::getPoints() const
 	return m_points;
 }
 
+const std::vector<Vector2>& QuadBezier::getIntermediatePoints() const
+{
+	std::vector<Vector2> interPoints{ m_points };
+	interPoints.erase(interPoints.begin());
+	interPoints.erase(interPoints.end());
+	return interPoints;
+}
+
 Vector2 QuadBezier::getCurvePoint(float t) const
 {
 	float u = 1.0f - t;

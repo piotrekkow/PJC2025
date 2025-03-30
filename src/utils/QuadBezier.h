@@ -17,6 +17,7 @@ public:
 
 	void drawBezier() const;
 	const std::vector<Vector2>& getPoints() const;
+	const std::vector<Vector2>& getIntermediatePoints() const;
 
 private:
 	Vector2 getCurvePoint(float t) const;

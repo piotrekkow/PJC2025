@@ -65,7 +65,7 @@ Segment* Node::addOutSegment(Node* destination)
 			m_out = std::make_unique<Segment>(this, destination);
 			std::cout << "Creating straight segment\n";
 		}
-			
+		// THIS CASE SHOULD BE IN NETWORK:
 		else // curve case (add multiple subdivisions in between)
 		{
 			std::optional<Vector2> intersectionOpt{ lineIntersect(m_position, m_tangent, destination->getPos(), destination->getTangent()) };
@@ -73,6 +73,11 @@ Segment* Node::addOutSegment(Node* destination)
 			{
 				Vector2 intersection{ intersectionOpt.value() };
 				QuadBezier curve(m_position, intersection, destination->getPos(), 0.98f);
+				for (auto& point : curve.getPoints())
+				{
+					if (point == curve.getPoints().begin()) break;
+					if (point == curve.getPoints().end())
+				}
 				std::cout << "Creating curved segment\n";
 			}
 		}
