@@ -26,17 +26,21 @@ Node* Network::addNode(Vector2 position, Vector2 tangent, int size)
 
 void Network::draw(bool debug)
 {
-	for (auto& node : m_nodes)
-	{
-		for (auto& edge : node->getOut()->getEdges())
-		{
-			edge->draw();
-		}
-		for (auto& vertex : node->getVertices())
-		{
-			DrawCircleV(vertex->getPos(), VERTEX_RADIUS, VERTEX_COLOR);
-		}
-		DrawLineV(node->getPos(), node->getPos() + node->getTangent() * DEBUG_AXES_LENGTH, TANGENT_COLOR);
-	}
-	if (debug) {}
+    for (auto& node : m_nodes)
+    {
+        if (node->getOut())
+        {
+            for (auto& edge : node->getOut()->getEdges())
+            {
+                edge->draw();
+            }
+        }
+
+        for (auto& vertex : node->getVertices())
+        {
+            DrawCircleV(vertex->getPos(), VERTEX_RADIUS, VERTEX_COLOR);
+        }
+        DrawLineV(node->getPos(), node->getPos() + node->getTangent() * DEBUG_AXES_LENGTH, TANGENT_COLOR);
+    }
+    if (debug) {}
 }

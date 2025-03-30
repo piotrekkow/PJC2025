@@ -18,8 +18,10 @@ void Simulation::initialize()
 	SetTargetFPS(60);
 	m_network = std::make_unique<Network>();
 
-	m_network->addNode({ 100, 100 }, { 1, 0 }, 3);
-	m_network->addNode({ 300, 100 }, { 1, 0 }, 3);
+	Node* node1 = m_network->addNode({ 100, 100 }, { 1, 0 }, 3);
+	Node* node2 = m_network->addNode({ 300, 150 }, { 0.8f, 0.2f }, 3);
+
+	node1->addOutSegment(node2);
 }
 
 void Simulation::run()

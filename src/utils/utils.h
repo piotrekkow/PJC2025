@@ -20,7 +20,7 @@ std::optional<Vector2> lineIntersect(const Vector2& v1, const Vector2& tangent1,
 std::optional<Vector2> lineIntersectCap(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2);			// capped at points
 float dotProduct(const Vector2& v1, const Vector2& v2);
 float determinant(const Vector2& v1, const Vector2& v2);
-bool isCollinear(const Vector2& pos1, const Vector2& tan1, const Vector2& pos2, const Vector2& tan2, const float allignmentThreshold = 0.99f);
+bool isCollinear(const Vector2& pos1, const Vector2& tan1, const Vector2& pos2, const Vector2& tan2, const float allignmentThreshold);
 
 //temp
 void drawArrow(Vector2& start, Vector2& end, float lineWidth, Color color);

@@ -3,7 +3,9 @@
 #include "config.h"
 #include "Waypoint.h"
 // #include "Junction.h"
+#include "QuadBezier.h"
 #include <stdexcept>
+#include <iostream>
 
 Node::Node(Vector2 position, Vector2 tangent, int laneCount)
 	: m_position{ position }
@@ -50,9 +52,34 @@ Segment* Node::getIn() const
 
 Segment* Node::addOutSegment(Node* destination)
 {
-	if (!isCollinear(m_position, m_tangent, destination->getPos(), destination->getTangent())) throw std::logic_error("Nodes must be collinear to be viably connected by a Segment");
+	int srcSize{ static_cast<int>(m_vertices.size()) };
+	int dstSize{ static_cast<int>(destination->getSize()) };
+	int sizeDifference{ srcSize - dstSize };
+	
 
-	m_out = std::make_unique<Segment>(this, destination);
+	if (sizeDifference == 0)
+	{
+		bool collinear{ isCollinear(m_position, m_tangent, destination->getPos(), destination->getTangent(), 0.98f) };
+		if (collinear) // straight edge case
+		{
+			m_out = std::make_unique<Segment>(this, destination);
+			std::cout << "Creating straight segment\n";
+		}
+			
+		else // curve case (add multiple subdivisions in between)
+		{
+			std::optional<Vector2> intersectionOpt{ lineIntersect(m_position, m_tangent, destination->getPos(), destination->getTangent()) };
+			if (intersectionOpt.has_value())
+			{
+				Vector2 intersection{ intersectionOpt.value() };
+				QuadBezier curve(m_position, intersection, destination->getPos(), 0.98f);
+				std::cout << "Creating curved segment\n";
+			}
+		}
+	}
+
+
+	destination->setInSegment(m_out.get());
 	return m_out.get();
 }
 
@@ -71,7 +98,7 @@ std::vector<Vertex*> Node::fillNode(int size)
 	std::vector<Vertex*> vertices{};
 
 	Vector2 step{ normal() * LANE_WIDTH };
-	Vector2 cursor{ m_position - step * static_cast<float>(size - 1) / 2 };
+	Vector2 cursor{ m_position };
 	for (int i = 0; i < size; ++i)
 	{
 		auto vertex{ addVertex<Waypoint>(cursor) };
@@ -80,8 +107,6 @@ std::vector<Vertex*> Node::fillNode(int size)
 	}
 	return vertices;
 }
-
-
 
 
 //void Node::drawAxes()
